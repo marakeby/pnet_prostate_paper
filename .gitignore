@@ -1,0 +1,14 @@
+*
+!.gitattributes
+!.gitignore
+!readme.md
+!.gitkeep
+!*.py
+!*/
+!*.ipynb
+_testing/
+_test/
+logs/
+.vscode/
+.idea/
+.ipynb_checkpoints/
