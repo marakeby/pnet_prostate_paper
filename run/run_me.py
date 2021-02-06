@@ -1,83 +1,89 @@
-# ----
-# from pipeline.increasing_sample_size_pipeline import IncreasingSampleSizePipeline
-# from pipeline.one_split_ensamble import OneSplitPipelineEnsemble
+import sys
+from os.path import join, dirname, realpath
+current_dir = dirname(realpath(__file__))
+sys.path.insert(0, dirname(current_dir))
+
+import datetime
+from utils.logs import set_logging, DebugFolder
+from config_path import PROSTATE_LOG_PATH, POSTATE_PARAMS_PATH
+from pipeline.train_validate import TrainValidatePipeline
+from pipeline.one_split import OneSplitPipeline
+from pipeline.crossvalidation_pipeline import CrossvalidationPipeline
+
+import sys
+import os
 import imp
 import logging
 import random
-
-import numpy as  np
+import timeit
+import numpy as np
 import tensorflow as tf
-
-
-random_seed = 234
-
-random.seed(random_seed)
-np.random.seed(random_seed)
-
-tf.random.set_random_seed(random_seed)
-import os
-import sys
-from os.path import join, dirname
-
-current_dir = dirname(os.path.realpath(__file__))
-print current_dir
-
-sys.path.insert(0, dirname(current_dir))
-
-from pipeline.crossvalidation_pipeline import CrossvalidationPipeline
-from pipeline.one_split import OneSplitPipeline
-from pipeline.train_validate import TrainValidatePipeline
-
-from utils.logs import set_logging, DebugFolder
-
-import datetime
-
-timeStamp = '_{0:%b}-{0:%d}_{0:%H}-{0:%M}'.format(datetime.datetime.now())
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
-#pnet
-params_file = './params/p1000/pnet/onsplit_average_reg_10_tanh_large_testing'
-# params_file = './params/p1000/pnet/onsplit_average_reg_10_tanh_large_testing_6layers'
-# params_file = './params/p1000/pnet/crossvalidation_average_reg_10_tanh'
-# params_file = './params/p1000/pnet/crossvalidation_average_reg_10_tanh_split18'
+random_seed = 234
+random.seed(random_seed)
+np.random.seed(random_seed)
+tf.random.set_random_seed(random_seed)
 
-#other ML models
-# params_file = './params/p1000/compare/onsplit_ML_test'
-# params_file = './params/p1000/compare/crossvalidation_ML_test'
 
-#dense
-# params_file = './params/p1000/dense/onesplit_number_samples_dense_sameweights'
-# params_file = './params/p1000/dense/onsplit_dense'
+timeStamp = '_{0:%b}-{0:%d}_{0:%H}-{0:%M}'.format(datetime.datetime.now())
 
-#number_samples
-# params_file = './params/p1000/number_samples/crossvalidation_average_reg_10'
-# params_file = './params/p1000/number_samples/crossvalidation_average_reg_10_tanh'
-# params_file = './params/p1000/number_samples/crossvalidation_number_samples_dense_sameweights'
+def elapsed_time(start_time, end_time):
+    elapsed_time = end_time - start_time
+    elapsed_mins = int(elapsed_time / 60)
+    elapsed_secs = int(elapsed_time - (elapsed_mins * 60))
+    return elapsed_mins, elapsed_secs
+    
+params_file_list = []
 
-#external_validation
-# params_file = './params/p1000/external_validation/pnet_validation'
+# pnet
+params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
+params_file_list.append('./pnet/crossvalidation_average_reg_10_tanh')
 
-params_file = join(current_dir, params_file)
-log_dir = params_file.replace('params', 'logs')
-log_dir = log_dir + timeStamp
-set_logging(log_dir)
+# other ML models
+params_file_list.append('./compare/onsplit_ML_test')
+params_file_list.append('./compare/crossvalidation_ML_test')
 
-logging.info('random seed %d' % random_seed)
-params_file_full = params_file + '.py'
-params = imp.load_source(params_file, params_file_full)
+# dense
+params_file_list.append('./dense/onesplit_number_samples_dense_sameweights')
+params_file_list.append('./dense/onsplit_dense')
 
-DebugFolder(log_dir)
-if params.pipeline['type'] == 'one_split':
-    pipeline = OneSplitPipeline(task=params.task, data_params=params.data, model_params=params.models,
-                                pre_params=params.pre, feature_params=params.features, pipeline_params=params.pipeline,
-                                exp_name=log_dir)
+# number_samples
+params_file_list.append('./number_samples/crossvalidation_average_reg_10')
+## params_file_list.append('./number_samples/crossvalidation_average_reg_10_tanh')
+params_file_list.append('./number_samples/crossvalidation_number_samples_dense_sameweights')
 
-elif params.pipeline['type'] == 'crossvalidation':
-    pipeline = CrossvalidationPipeline(task=params.task, data_params=params.data, feature_params=params.features,
-                                       model_params=params.models, pre_params=params.pre,
-                                       pipeline_params=params.pipeline, exp_name=log_dir)
-elif params.pipeline['type'] == 'Train_Validate':
-    pipeline = TrainValidatePipeline (data_params = params.data,  model_params = params.models, pre_params = params.pre, feature_params = params.features, pipeline_params=params.pipeline, exp_name = log_dir)
+# external_validation
+params_file_list.append('./external_validation/pnet_validation')
 
-pipeline.run()
+
+
+for params_file in params_file_list:
+    log_dir = join(PROSTATE_LOG_PATH, params_file)
+    log_dir = log_dir
+    set_logging(log_dir)
+    params_file = join(POSTATE_PARAMS_PATH, params_file)
+    logging.info('random seed %d' % random_seed)
+    params_file_full = params_file + '.py'
+    params = imp.load_source(params_file, params_file_full)
+
+    DebugFolder(log_dir)
+    if params.pipeline['type'] == 'one_split':
+        pipeline = OneSplitPipeline(task=params.task, data_params=params.data, model_params=params.models,
+                                    pre_params=params.pre, feature_params=params.features, pipeline_params=params.pipeline,
+                                    exp_name=log_dir)
+
+    elif params.pipeline['type'] == 'crossvalidation':
+        pipeline = CrossvalidationPipeline(task=params.task, data_params=params.data, feature_params=params.features,
+                                           model_params=params.models, pre_params=params.pre,
+                                           pipeline_params=params.pipeline, exp_name=log_dir)
+    elif params.pipeline['type'] == 'Train_Validate':
+        pipeline = TrainValidatePipeline(data_params=params.data,  model_params=params.models, pre_params=params.pre,
+                                         feature_params=params.features, pipeline_params=params.pipeline, exp_name=log_dir)
+
+    start = timeit.default_timer()
+    pipeline.run()
+    stop = timeit.default_timer()
+    mins, secs = elapsed_time(start, stop)
+    logging.info('Epoch Time: {}m {}s'.format(mins,secs))

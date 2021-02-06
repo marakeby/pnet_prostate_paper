@@ -1,3 +1,4 @@
+from setup import saving_dir
 import pandas as pd
 import scipy
 from matplotlib import pyplot as plt, ticker
@@ -7,7 +8,7 @@ from matplotlib.ticker import FormatStrFormatter, NullFormatter
 from scipy import stats
 from scipy.optimize import curve_fit
 import seaborn as sns
-from config_path import PROSTATE_LOG_PATH, PROSTATE_DATA_PATH
+from config_path import PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
 
 
 # current_dir = dirname(dirname(dirname(realpath(__file__))))
@@ -16,7 +17,7 @@ from config_path import PROSTATE_LOG_PATH, PROSTATE_DATA_PATH
 def get_dense_sameweights(col='f1'):
     # filename = '/run/logs/prostate/prostate_paper/candidates/1/dense/'
     # filename = join(current_dir, 'run/logs/p1000/dense/crossvalidation_average_reg_10_Apr-11_16-04')
-    filename = join(PROSTATE_LOG_PATH, 'number_samples/crossvalidation_number_samples_dense_sameweights_Apr-13_15-25')
+    filename = join(PROSTATE_LOG_PATH, 'number_samples/crossvalidation_number_samples_dense_sameweights')
     # exp_name = 'crossvalidation_number_samples_dense_sameweights_Jan-10_17-46'
 
 
@@ -42,7 +43,7 @@ def get_dense_sameweights(col='f1'):
 def get_pnet_preformance(col='f1'):
     # filename = join(current_dir, 'run/logs/p1000/number_samples/crossvalidation_average_reg_10_Apr-11_16-06')
     # filename = join(current_dir, 'run/logs/p1000/number_samples/crossvalidation_average_reg_10_tanh_Apr-13_17-18')
-    filename = join(PROSTATE_LOG_PATH, 'number_samples/crossvalidation_average_reg_10_tanh_Apr-13_18-32')
+    filename = join(PROSTATE_LOG_PATH, 'number_samples/crossvalidation_average_reg_10_tanh')
     filename = filename+'/folds.csv'
     #
     # filename = '~/PycharmProjects/ml_pipeline/run/logs/prostate/prostate_paper/candidates/1/number_samples/'
@@ -211,8 +212,7 @@ def plot_pnet_vs_dense_auc(ax):
     plot_compaison(ax,'AUC', df_pnet, df_dense_sameweights)
 
 
-def plot_pvalue():
-    pass
+
 def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
 
     sns.set_color_codes('muted')
@@ -380,8 +380,7 @@ def plot_pnet_vs_dense_ratio(ax2, c = 'auc'):
 base_dir = PROSTATE_LOG_PATH
 models_base_dir = join(base_dir , 'compare/onsplit_ML_test_Apr-11_11-34')
 
-if __name__ =='__main__':
-
+def run_pnet():
     #main figure AUC
     fig = plt.figure(figsize=(8, 5))
     ax = fig.subplots(1, 1)
@@ -392,7 +391,8 @@ if __name__ =='__main__':
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
     plt.subplots_adjust(bottom=0.15, right=0.85, left=0.15)
-    plt.savefig('./output/pnet_vs_dense_sameweights_auc_with_ratio.png', dpi=200)
+    filename = join(saving_dir, 'pnet_vs_dense_sameweights_auc_with_ratio.png')
+    plt.savefig(filename, dpi=200)
     plt.close()
 
     # supp figures other metrics
@@ -402,68 +402,12 @@ if __name__ =='__main__':
         ax = fig.subplots(1, 1)
         plot_pnet_vs_dense_with_ratio(ax, c, label=l, plot_ratio=False)
         plt.subplots_adjust(bottom=0.15)
-        plt.savefig('./output/pnet_vs_dense_sameweights_{}.png'.format(c), dpi=200)
+        filename= join(saving_dir,'pnet_vs_dense_sameweights_{}.png'.format(c))
+        plt.savefig(filename.format(c), dpi=200)
         plt.close()
 
-        # df_dense_sameweights = get_dense_sameweights(c)
-        # df_pnet =get_pnet_preformance(col=c)
-        # print df_dense_sameweights.shape, df_pnet.shape
-        # plot_(df_pnet, df_dense_sameweights)
-        # plot_(df_pnet, df_dense_sameweights)
-        #
-        # plt.savefig('./output/pnet_vs_dense_sameweights_{}.png'.format(c))
 
-        # if c=='auc':
-        #
-        #     print df_pnet.columns
-        #     print df_dense_sameweights.columns
-        #     auc_pvalues = get_stats(df_pnet, df_dense_sameweights)
-        #
-        #     x = df_pnet.mean()
-        #     y = df_dense_sameweights.mean()
-        #     print type(x)
-        #     ratio = (x.values-y.values)/x.values
-        #
-        #
-        #     fig = plt.figure()
-        #     ax = fig.add_axes([0, 0, 1, 1])
-        #     ind= range(len(ratio))
-        #     ax.bar(ind, ratio)
-        #     ax.set_xticks(ind, sizes)
-        #     plt.xlabel('Number of samples', fontdict=dict(weight='bold', fontsize=14))
-        #     plt.ylabel('Ratio', fontdict=dict(weight='bold', fontsize=14))
-        #     plt.savefig('auc_ratio.png')
-        #     print ratio
-
-
-
-# print sizes
-# print zip (sizes,auc_pvalues)
-# print zip (sizes,ratio)
-    # plt.savefig('pnet_vs_dense_sameweights_{}.png'.format(c), dpi=600)
-
-#
-#
-
-#
-# # same number of nodes (first laer sparse, all others dense (14 M weights))
-# fontsize = 14
-# y = df_pnet.mean()
-# dy= df_pnet.std()
-# x = range(df_pnet.shape[1])
-#
-# fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True)
-# plt.plot(x, y,  linestyle='-', marker='o', color='red')
-# plt.fill_between(x, y - dy, y + dy, color='mistyrose', alpha=0.2)
-# y = df_sparse_dense.mean()
-# dy= df_sparse_dense.std()
-# plt.plot(x, y,  linestyle='-', marker='o', color='black')
-# plt.fill_between(x, y - dy, y + dy, color='gray', alpha=0.1)
-# plt.ylim((0.4,.9))
-# ax.spines['top'].set_visible(False)
-# ax.spines['right'].set_visible(False)
-# plt.legend(['P-net', 'Dense'], fontsize=10)
-# plt.xlabel('Number of samples',  fontsize=fontsize)
-# plt.ylabel('F1 score', fontsize=fontsize)
-# plt.savefig('pnet_vs_sparse1_dense.png')
-
+if __name__ =='__main__':
+    run_pnet()
+    
+      

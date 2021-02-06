@@ -3,11 +3,12 @@ from os.path import join, dirname, expanduser
 import networkx as nx
 import pandas as pd
 from data.gmt_reader import GMT
+from config_path import REACTOM_PATHWAY_PATH
 
-data_dir = dirname(__file__)
-reactome_base_dir = join(data_dir, 'Reactome')
-reactome_base_dir = join(reactome_base_dir, 'input')
-
+# data_dir = dirname(__file__)
+# reactome_base_dir = join(data_dir, 'Reactome')
+# reactome_base_dir = join(reactome_base_dir, 'input')
+reactome_base_dir=  REACTOM_PATHWAY_PATH
 relations_file_name = 'ReactomePathwaysRelation.txt'
 pathway_names = 'ReactomePathways.txt'
 pathway_genes = 'ReactomePathways.gmt'

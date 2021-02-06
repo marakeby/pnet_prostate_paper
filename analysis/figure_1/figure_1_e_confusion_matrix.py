@@ -1,3 +1,9 @@
+import sys
+from os.path import join, dirname, realpath, exists
+from os import makedirs
+current_dir = dirname(dirname(realpath(__file__)))
+sys.path.insert(0, dirname(current_dir))
+
 import pandas as pd
 from matplotlib import pyplot as plt, ticker
 from os.path import join
@@ -11,7 +17,7 @@ from sklearn.metrics import confusion_matrix
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # set default params
-from config_path import PROSTATE_LOG_PATH
+from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
 
 custom_rcParams = {
     'figure.figsize': (8, 3),
@@ -120,7 +126,7 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
 
 def plot_confusion_matrix_all(ax):
     base_dir = join(PROSTATE_LOG_PATH, 'pnet')
-    models_base_dir = join(base_dir, 'onsplit_average_reg_10_tanh_large_testing_Apr-11_11-22')
+    models_base_dir = join(base_dir, 'onsplit_average_reg_10_tanh_large_testing')
     filename = join(models_base_dir, 'P-net_ALL_testing.csv')
     df = pd.read_csv(filename, index_col=0)
     df.pred = df.pred_scores > 0.5
@@ -142,8 +148,14 @@ def plot_confusion_matrix_all(ax):
                           # title='Confusion matrix',
                           # cmap=plt.cm.Blues)
                           cmap=plt.cm.Reds)
-if __name__=='__main__':
+
+def run_matrix():
+    saving_dir = join(PLOTS_PATH, 'figure1')
     fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(5,4), dpi=400)
     plot_confusion_matrix_all(ax)
-    plt.savefig('./output/confusion matrix.png', dpi=400)
+    filename = join(saving_dir, 'confusion matrix.png')
+    plt.savefig(filename, dpi=400)
 
+if __name__=='__main__':
+    run_matrix()
+    

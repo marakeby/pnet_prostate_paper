@@ -1,3 +1,5 @@
+from setup import saving_dir
+
 import itertools
 
 import pandas as pd
@@ -119,7 +121,6 @@ def plot_external_validation_all(ax):
 
 
 
-
 def plot_external_validation_matrix(ax):
     normalize = True
     labels = np.array([['TR', 'TR'], ['ER ', 'ER']])
@@ -175,21 +176,28 @@ def plot_external_validation_matrix(ax):
     ax2.set_xticks([])
 
 
-if __name__ =='__main__':
-
+def run_externnal_validation():
     plot_(primary)
-    plt.savefig('./output/external_validation_primary.png',  dpi=600)
+    filename= join(saving_dir, 'external_validation_primary.png')
+    plt.savefig(filename,  dpi=600)
 
     plot_(mets)
-    plt.savefig('./output/external_validation_mets.png', dpi=600)
+    filename= join(saving_dir, 'external_validation_mets.png')
+    plt.savefig(filename, dpi=600)
 
     fig, axes = plt.subplots(nrows=1, ncols=1, sharey=True)
     fig.set_size_inches(5, 7)
     ax = axes
     plot_stacked(ax, '', primary, mets)
-    plt.savefig('./output/external_validation_all.png', dpi=600)
+    filename= join(saving_dir, 'external_validation_all.png')
+    plt.savefig(filename, dpi=600)
 
     fig= plt.figure(figsize=(4,4))
     ax= fig.subplots(1,1)
     plot_external_validation_matrix(ax)
-    plt.savefig('./output/external_validation_matrix.png', dpi=200)
+    filename= join(saving_dir, 'external_validation_matrix.png')
+    plt.savefig(filename, dpi=200)
+
+if __name__ =='__main__':
+    run_externnal_validation()
+    

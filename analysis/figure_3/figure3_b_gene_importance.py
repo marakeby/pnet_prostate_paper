@@ -1,11 +1,14 @@
+from setup import saving_dir
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
 from os.path import join
 import seaborn as sns
 import numpy as np
+from os.path import join, dirname, realpath, exists
+from os import makedirs
 
-def plot_high_genes_sns(df, col='avg_score', name='', saving_dir='.'):
+def plot_high_genes_sns(df, col='avg_score', name='', saving_directory='.'):
     df.index=df.index.map(shorten_names)
     x_pos = range(df.shape[0])
     ax = sns.barplot(y=df.index, x=col, data=df,
@@ -23,9 +26,9 @@ def plot_high_genes_sns(df, col='avg_score', name='', saving_dir='.'):
 
 
 
-def plot_high_genes(df, col='avg_score', name='', saving_dir='.'):
-    if not os.path.exists(saving_dir):
-        os.makedirs(saving_dir)
+def plot_high_genes(df, col='avg_score', name='', saving_directory='.'):
+    if not os.path.exists(saving_directory):
+        os.makedirs(saving_directory)
 
     high_pos = df[df[col] > 0]
     high_neg = df[df[col] < 0].sort_values(col, ascending=False)
@@ -52,13 +55,13 @@ def plot_high_genes(df, col='avg_score', name='', saving_dir='.'):
     ax.get_xaxis().set_ticks([])
 
     plt.gcf().subplots_adjust(left=0.35)
-    filename = join(saving_dir, name + '_high.png')
+    filename = join(saving_directory, name + '_high.png')
 
     print 'saving histogram', filename
     plt.savefig(filename)
 
 
-def plot_high_genes_histogram(df_in, features, y, name, saving_dir):
+def plot_high_genes_histogram(df_in, features, y, name, saving_directory):
     df_in = df_in.copy()
     df_in = df_in.join(y)
     df_in['group'] = df_in.response
@@ -69,18 +72,18 @@ def plot_high_genes_histogram(df_in, features, y, name, saving_dir):
     g = sns.FacetGrid(df2, col="variable", hue="group", col_wrap=2)
     g.map(plt.hist, 'value', bins=bins, ec="k")
     g.axes[-1].legend(['primary', 'metastatic'])
-    filename = join(saving_dir, name + '_importance_histogram.png')
+    filename = join(saving_directory, name + '_importance_histogram.png')
 
     print 'saving histogram', filename
     plt.savefig(filename)
     plt.close()
 
 
-def plot_high_genes_violinplot(df_in, features, y, name, saving_dir):
+def plot_high_genes_violinplot(df_in, features, y, name, saving_directory):
     df_in = df_in.copy()
     df_in = df_in.join(y)
     df_in['group'] = df_in.response
-    filename = join(saving_dir, name + '_importance.csv')
+    filename = join(saving_directory, name + '_importance.csv')
     df_tobesaved = df_in[features]
     df_tobesaved.to_csv(filename)
     df2 = pd.melt(df_in, id_vars='group', value_vars=list(features), value_name='value')
@@ -88,7 +91,7 @@ def plot_high_genes_violinplot(df_in, features, y, name, saving_dir):
     plt.figure(figsize=(10, 7))
     ax = sns.violinplot(x="variable", y="value", hue="group", data=df2, split=True, bw=.6, inner=None)
     ax.legend(['primary', 'metastatic'])
-    filename = join(saving_dir, name + '_importance_violinplot.png')
+    filename = join(saving_directory, name + '_importance_violinplot.png')
     ax.tick_params(labelsize=12)
 
     ax.set_xticklabels(ax.get_xticklabels(), rotation=30, ha='right')
@@ -103,7 +106,7 @@ def plot_high_genes_violinplot(df_in, features, y, name, saving_dir):
     plt.close()
 
 
-def plot_high_genes_swarm(df_in, features, y, name, saving_dir):
+def plot_high_genes_swarm(df_in, features, y, name, saving_directory):
     df_in = df_in.copy()
     df_in = df_in.join(y)
     df_in['group'] = df_in.response
@@ -133,7 +136,7 @@ def plot_high_genes_swarm(df_in, features, y, name, saving_dir):
     ax.tick_params(labelsize=20)
     plt.xlabel('')
     plt.ylabel('Importance Score', fontsize=20)
-    filename = join(saving_dir, name + '_importance_swarm.png')
+    filename = join(saving_directory, name + '_importance_swarm.png')
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -157,7 +160,7 @@ def plot_high_genes_swarm(df_in, features, y, name, saving_dir):
 #         print l
 #         high_nodes = node_importance[node_importance.layer ==l].abs().nlargest(10, columns=['coef_combined'])
 #         high_nodes.to_csv('./output/layer_high_{}.csv'.format(l))
-#         plot_high_genes(high_nodes, col='coef_combined', name=str(l), saving_dir='./output/importance')
+#         plot_high_genes(high_nodes, col='coef_combined', name=str(l), saving_directory='./output/importance')
 #
 #
 #
@@ -169,9 +172,9 @@ def plot_high_genes_swarm(df_in, features, y, name, saving_dir):
 #         df = pd.read_csv('../extracted/gradient_importance_detailed_{}.csv'.format(l), index_col=0)
 #         y = response
 #         # if l==1:
-#         #     plot_high_genes_swarm(df, features, y, name=str(l), saving_dir='./output/importance')
-#         plot_high_genes_histogram(df, features, y, name=str(l), saving_dir='./output/importance')
-#         plot_high_genes_violinplot(df, features, y, name=str(l), saving_dir='./output/importance')
+#         #     plot_high_genes_swarm(df, features, y, name=str(l), saving_directory='./output/importance')
+#         plot_high_genes_histogram(df, features, y, name=str(l), saving_directory='./output/importance')
+#         plot_high_genes_violinplot(df, features, y, name=str(l), saving_directory='./output/importance')
 
 
 def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
@@ -245,20 +248,24 @@ def shorten_names(name):
         name= name[:60]+'...'
     return name
 
+current_dir = dirname(realpath(__file__))
 
-
-if __name__ == "__main__":
-    node_importance = pd.read_csv('../extracted/node_importance_graph_adjusted.csv', index_col=0)
-    response = pd.read_csv('../extracted/response.csv', index_col=0)
+def run():
+    node_importance = pd.read_csv(join(current_dir,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    response = pd.read_csv(join(current_dir, 'extracted/response.csv'), index_col=0)
     print response.head()
     layers = list(node_importance.layer.unique())
-    saving_dir = './output/importance'
+    # saving_directory = './output/importance'
+    saving_directory =join(saving_dir, 'importance')
+    if not exists(saving_directory):
+        makedirs(saving_directory)
+
     for l in layers:
         fig = plt.figure(figsize=(8, 4), dpi=200)
         print l
         if l==1:
             high_nodes = node_importance[node_importance.layer == l].abs().nlargest(10, columns=['coef_combined'])
-            plot_high_genes_sns(high_nodes, col='coef_combined', name=str(l), saving_dir='./output/importance')
+            plot_high_genes_sns(high_nodes, col='coef_combined', name=str(l), saving_directory=saving_directory)
         else:
 
             high_nodes = node_importance[node_importance.layer == l].abs().nlargest(10, columns=['coef'])
@@ -270,7 +277,10 @@ if __name__ == "__main__":
             shift=0.6
 
         plt.gcf().subplots_adjust(left=shift)
-        filename = join(saving_dir, str(l) + '_high.png')
+        filename = join(saving_directory, str(l) + '_high.png')
         print 'saving', filename
         plt.savefig(filename)
-        high_nodes.to_csv('./output/layer_high_{}.csv'.format(l))
+        high_nodes.to_csv(join(saving_directory,'layer_high_{}.csv'.format(l)))
+
+if __name__ == "__main__":
+    run()

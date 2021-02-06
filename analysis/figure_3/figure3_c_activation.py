@@ -1,6 +1,7 @@
+from setup import saving_dir
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.stats import pearsonr
-
+from os.path import join, dirname, realpath, exists
 from analysis.figure_3.data_extraction_utils import get_pathway_names
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -81,8 +82,9 @@ def corrfunc(x, y, **kws):
 #         plot_high_genes_violinplot(to_be_saved, response, name='l{}'.format(l), saving_dir='./visualizations/activation')
 #         to_be_saved =  to_be_saved[features[0:6]]
 #         plot_high_genes_pairplot(to_be_saved, response, name='l{}'.format(l), saving_dir='./visualizations/activation')
+current_dir = dirname(realpath(__file__))
 
-def plot_activation(ax, column='coef_combined', layer=3, pad=200):
+def plot_activation(ax, l, column='coef_combined', layer=3, pad=200):
     # divider = make_axes_locatable(ax)
     # ax2 = divider.append_axes('left', size='100%', pad=0.6)
     # ax2.spines['top'].set_visible(False)
@@ -92,9 +94,9 @@ def plot_activation(ax, column='coef_combined', layer=3, pad=200):
     # ax2.set_yticks([])
     # ax2.set_xticks([])
 
-    node_activation = pd.read_csv('../extracted/node_importance_graph_adjusted.csv', index_col=0)
-    response = pd.read_csv('../extracted/response.csv', index_col=0)
-    df = pd.read_csv('../extracted/activation_{}.csv'.format(layer), index_col=0)
+    node_activation = pd.read_csv(join(current_dir,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    response = pd.read_csv(join(current_dir,'extracted/response.csv'), index_col=0)
+    df = pd.read_csv(join(current_dir,'extracted/activation_{}.csv'.format(layer)), index_col=0)
     df.columns = get_pathway_names(df.columns)
     if layer==1:
         column='coef_combined'
@@ -162,8 +164,7 @@ def plot_activation(ax, column='coef_combined', layer=3, pad=200):
     # to_be_saved = to_be_saved[features[0:6]]
     # plot_high_genes_pairplot(to_be_saved, response, name='l{}'.format(l), saving_dir='./visualizations/activation')
 
-
-if __name__=="__main__":
+def run():
     left_adjust=[0.1, 0.]
     pad=[50, 250, 200, 250, 200, 200]
     # fig = plt.figure(figsize=(8, 4))
@@ -172,14 +173,18 @@ if __name__=="__main__":
         fig = plt.figure(figsize=(9, 4))
         # ax = plt.subplot(6, 1,l)
         ax = fig.subplots(1,1)
-        plot_activation(ax, column='coef', layer=l, pad=pad[l-1] )
+        plot_activation(ax, l, column='coef', layer=l, pad=pad[l-1] )
         # plt.subplots_adjust(left=0.5)
         if l==1:
             shift=0.3
         else:
             shift=0.6
         plt.subplots_adjust(left=shift)
-        plt.savefig('./output/layer_activation{}.png'.format(l), dpi=200)
+        filename = join(saving_dir, 'layer_activation{}.png'.format(l))
+        plt.savefig(filename, dpi=200)
+
+if __name__=="__main__":
+    run()
     # plt.savefig('./output/layer_activation{}.png'.format('all'), dpi=200)
 #
 

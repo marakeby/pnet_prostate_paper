@@ -34,8 +34,8 @@ class DataModelLoader():
         return self.x_train, self.x_test, self.y_train, self.y_test, self.info_train, self.info_test, self.columns
 
     def get_model(self, model_name='P-net_params.yml'):
-        if self.model is None:
-            self.model = self.load_model(self.dir_path, model_name)
+        # if self.model is None:
+        self.model = self.load_model(self.dir_path, model_name)
         return self.model
 
     def load_model(self,model_dir_, model_name):

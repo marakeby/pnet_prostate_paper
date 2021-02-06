@@ -1,8 +1,14 @@
+import sys
+from os.path import join, dirname, realpath, exists
+from os import makedirs
+current_dir = dirname(dirname(realpath(__file__)))
+sys.path.insert(0, dirname(current_dir))
+
 import collections
 
 import pandas as pd
 from matplotlib import pyplot as plt, ticker
-from os.path import join
+
 import numpy as np
 from sklearn import metrics
 from sklearn.metrics import average_precision_score
@@ -10,7 +16,7 @@ import seaborn as sns
 import matplotlib as mpl
 
 # set default params
-from config_path import PROSTATE_LOG_PATH
+from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
 
 custom_rcParams = {
     'figure.figsize': (8, 3),
@@ -70,7 +76,7 @@ all_models_dict = {}
 # base_dir = './../../run/logs/p1000/'
 # base_dir = join(PROSTATE_LOG_PATH, 'pnet')
 base_dir = PROSTATE_LOG_PATH
-models_base_dir = join(base_dir , 'compare/onsplit_ML_test_Apr-11_11-34')
+models_base_dir = join(base_dir , 'compare/onsplit_ML_test')
 models = ['Linear Support Vector Machine ', 'RBF Support Vector Machine ', 'L2 Logistic Regression', 'Random Forest',
           'Adaptive Boosting', 'Decision Tree']
 
@@ -78,7 +84,7 @@ for i, m in enumerate(models):
     df = pd.read_csv(join(models_base_dir, m + '_data_0_testing.csv'), sep=',', index_col=0, header=[0, 1])
     all_models_dict[m] = df
 
-pnet_base_dir = join(base_dir , 'pnet/onsplit_average_reg_10_tanh_large_testing_Apr-11_11-22')
+pnet_base_dir = join(base_dir , 'pnet/onsplit_average_reg_10_tanh_large_testing')
 df_pnet = pd.read_csv(join(pnet_base_dir, 'P-net_ALL_testing.csv'), sep=',', index_col=0, header=[0, 1])
 all_models_dict['P-net'] = df_pnet
 n = len(models)+1
@@ -152,19 +158,31 @@ def plot_auc_all(ax):
 
 
 fontproperties = {'family': 'Arial', 'weight': 'bold', 'size': 14}
+saving_dir = join(PLOTS_PATH, 'figure1')
 
-if __name__=="__main__":
+if not exists(saving_dir):
+    makedirs(saving_dir)
 
+
+def run_prc():
     fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(5,4), dpi=400)
     plot_prc_all(ax)
     plt.gcf().subplots_adjust(bottom=0.15)
-    plt.savefig( './output/_prc', dpi=400)
+    filename= join(saving_dir, '_prc')
+    plt.savefig( filename, dpi=400)
 
-    # plt.savefig( '_prc', dpi=600)
 
-if __name__=="__main__":
+def run_auc():
     fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(5,4), dpi=400)
     plot_auc_all(ax)
     # plt.legend(loc="lower right", prop={'size':10}, framealpha=0.0)
     plt.legend(loc="lower right", fontsize=8, framealpha=0.0)
-    plt.savefig('./output/_auc', dpi=400)
+    filename= join(saving_dir, '_auc')
+    plt.savefig(filename, dpi=400)
+
+if __name__=="__main__":
+    run_prc()
+    run_auc()
+    sns.set_style(None)
+
+    

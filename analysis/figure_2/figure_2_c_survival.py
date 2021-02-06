@@ -1,3 +1,5 @@
+from setup import saving_dir
+
 import pandas as pd
 from matplotlib import pyplot as plt, ticker
 from os.path import join
@@ -56,7 +58,7 @@ def get_predictions(filename, correct_prediction = True):
 
 
 def get_clinical():
-    filename = join( base_dir , 'prostate_paper/supporting_data/prad_p1000_clinical_final.txt')
+    filename = join( base_dir , 'prostate/supporting_data/prad_p1000_clinical_final.txt')
     clinical_df  = pd.read_csv(filename, sep='\t')
     return clinical_df
 
@@ -93,14 +95,14 @@ def plot_score_vs_pfs_time(filename, correct_prediction):
         plt.title(label)
 
     plot_data(df, label='all')
-    saving_filename = join(dirname(filename), 'prediction_vs_pfs_time_all.png')
+    saving_filename = join(saving_dir, 'prediction_vs_pfs_time_all.png')
     print saving_filename
     plt.savefig(saving_filename)
     plot_data(correct, label='correct')
-    saving_filename = join(dirname(filename), 'prediction_vs_pfs_time_correct.png')
+    saving_filename = join(saving_dir, 'prediction_vs_pfs_time_correct.png')
     plt.savefig(saving_filename)
     plot_data(wrong, label='wrong')
-    saving_filename = join(dirname(filename), 'prediction_vs_pfs_time_wrong.png')
+    saving_filename = join(saving_dir, 'prediction_vs_pfs_time_wrong.png')
     plt.savefig(saving_filename)
 
 
@@ -368,7 +370,7 @@ def plot_surv(ax, filename, correct_prediction):
     ax.legend(prop={'size': 10})
     # ax.set_aspect(1.)
 
-filename = join(LOG_PATH, 'p1000/pnet/onsplit_average_reg_10_tanh_large_testing_Apr-11_11-22')
+filename = join(LOG_PATH, 'p1000/pnet/onsplit_average_reg_10_tanh_large_testing')
 ci_show = False
 
 def plot_surv_all(ax):
@@ -376,13 +378,19 @@ def plot_surv_all(ax):
     full_filename = join(filename, 'P-net_ALL_testing.csv')
     plot_surv(ax, full_filename, correct_prediction)
 
-if __name__ =='__main__':
+
+def run():
     fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(6, 5))
     plot_surv_all(ax)
     plt.subplots_adjust(bottom=0.15, left=0.25)
     # saving_filename = join(dirname(filename), 'BCR.png')
-    saving_filename = './output/survival.png'
+    saving_filename = join(saving_dir,'survival.png')
     plt.savefig(saving_filename, dpi=200)
+
+
+if __name__ =='__main__':
+    run()
+    
 
 
 

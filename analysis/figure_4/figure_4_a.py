@@ -1,3 +1,4 @@
+from setup import saving_dir
 import pandas as pd
 from os.path import dirname, join, realpath
 from matplotlib import  pyplot as plt
@@ -77,8 +78,8 @@ def plot_hist_cnv(df, gene_name, ax):
 
 
 
-current_dir = dirname(realpath(__file__))
-current_dir= join(current_dir, 'output')
+# # current_dir = dirname(realpath(__file__))
+# current_dir= join(saving_dir, 'output')
 
 def plot_stacked_hist_cnv(df, gene_name, ax):
     ind = np.sort(df[gene_name].unique())
@@ -161,26 +162,27 @@ def plot_stacked_hist_mut(df, gene_name, ax):
 selected_genes=[ 'AR','TP53','PTEN','FGFR1', 'MDM4',  'RB1', 'NOTCH1', 'MAML3', 'PDGFA', 'EIF3E']
 # columns= set(df.columns).intersection(df_mut.columns)
 
-# for g in columns:
-for g in selected_genes:
-    # fig =plt.figure()
-    fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(6,4), dpi=200)
-    plt.ylim(0, 110)
-    plt.subplots_adjust(bottom=0.3)
-    # fig.set_size_inches(8, 6)
-    # plt.subplot(121)
-    if g in df_cnv.columns:
-        # plot_hist_cnv(df_cnv, g, axes[0])
-        plot_stacked_hist_cnv(df_cnv, g, axes[0])
-    # plt.subplot(122)
-    if g in df_mut.columns:
-        # plot_hist_mut(df_mut, g, axes[1])
-        plot_stacked_hist_mut(df_mut, g, axes[1])
+def run():
 
-    filename = join(current_dir, g + '.png')
-    fig.suptitle(g, fontdict=dict(family='Arial', weight='bold', fontsize=12))
-    plt.savefig(filename, dpi=200)
-    plt.close()
+    for g in selected_genes:
+        # fig =plt.figure()
+        fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(6,4), dpi=200)
+        plt.ylim(0, 110)
+        plt.subplots_adjust(bottom=0.3)
+        # fig.set_size_inches(8, 6)
+        # plt.subplot(121)
+        if g in df_cnv.columns:
+            # plot_hist_cnv(df_cnv, g, axes[0])
+            plot_stacked_hist_cnv(df_cnv, g, axes[0])
+        # plt.subplot(122)
+        if g in df_mut.columns:
+            # plot_hist_mut(df_mut, g, axes[1])
+            plot_stacked_hist_mut(df_mut, g, axes[1])
 
-# plot_hist(gene_name)
-# plot_scatter(gene_name)
+        filename = join(saving_dir, g + '.png')
+        fig.suptitle(g, fontdict=dict(family='Arial', weight='bold', fontsize=12))
+        plt.savefig(filename, dpi=200)
+        plt.close()
+
+if __name__ == "__main__":
+    run()

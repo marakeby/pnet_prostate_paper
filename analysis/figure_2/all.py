@@ -1,3 +1,5 @@
+from setup import saving_dir
+
 from matplotlib import pyplot as plt, gridspec
 import numpy as np
 
@@ -88,4 +90,5 @@ plot_high_genes(ax11, graph='swarm', layer=1)
 # plt.show()
 
 # fig.tight_layout()
-plt.savefig('./output/all.png')
+filename = join(saving_dir, 'all.png')
+plt.savefig(filename)

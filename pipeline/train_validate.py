@@ -38,7 +38,7 @@ def plot_2D(x, y, keys, marker ='o'):
 def get_validation_primary(cols, cnv_split):
 
     current_dir = dirname(dirname(realpath(__file__)))
-    validation_data_dir = join(current_dir, 'data/prostate_paper/external_validation/')
+    validation_data_dir = join(current_dir, '_database/prostate/external_validation/')
 
     valid_cnv = pd.read_csv(join(validation_data_dir,'PRAD/cnv_matrix.csv'), index_col=0)
     valid_mut = pd.read_csv(join(validation_data_dir,'PRAD/mut_matrix.csv'), index_col=0)
@@ -175,9 +175,9 @@ def get_validation_metastatic(cols, cnv_split):
      'TP_2081', 'TP_2090', 'TP_2093', 'TP_2096', 'TP_2156']
 
     met500_samples = set(prostate_samples).difference(common_samples)
-    common_samples = pd.DataFrame(index= prostate_samples)
+    common_samples = pd.DataFrame(index= met500_samples)
     current_dir = dirname(dirname(realpath(__file__)))
-    validation_data_dir = join(current_dir, 'data/prostate_paper/external_validation/')
+    validation_data_dir = join(current_dir, '_database/prostate/external_validation/')
 
     valid_cnv = pd.read_csv(join(validation_data_dir,'Met500/Met500_cnv.txt'), index_col=0, sep='\t')
     valid_mut = pd.read_csv(join(validation_data_dir,'Met500/Met500_mut_matrix.csv'),  index_col=0)
