@@ -1,5 +1,8 @@
 import sys
 from os.path import join, dirname, realpath
+
+from pipeline.LeaveOneOut_pipeline import LeaveOneOutPipeline
+
 current_dir = dirname(realpath(__file__))
 sys.path.insert(0, dirname(current_dir))
 
@@ -38,25 +41,36 @@ def elapsed_time(start_time, end_time):
 params_file_list = []
 
 # pnet
-params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
-params_file_list.append('./pnet/crossvalidation_average_reg_10_tanh')
+# params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
+# params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing_inner')
+# params_file_list.append('./pnet/crossvalidation_average_reg_10_tanh')
 
 # other ML models
-params_file_list.append('./compare/onsplit_ML_test')
-params_file_list.append('./compare/crossvalidation_ML_test')
+# params_file_list.append('./compare/onsplit_ML_test')
+# params_file_list.append('./compare/crossvalidation_ML_test')
 
 # dense
-params_file_list.append('./dense/onesplit_number_samples_dense_sameweights')
-params_file_list.append('./dense/onsplit_dense')
+# params_file_list.append('./dense/onesplit_number_samples_dense_sameweights')
+# params_file_list.append('./dense/onsplit_dense')
 
 # number_samples
-params_file_list.append('./number_samples/crossvalidation_average_reg_10')
-## params_file_list.append('./number_samples/crossvalidation_average_reg_10_tanh')
-params_file_list.append('./number_samples/crossvalidation_number_samples_dense_sameweights')
+# params_file_list.append('./number_samples/crossvalidation_average_reg_10')
+# ## params_file_list.append('./number_samples/crossvalidation_average_reg_10_tanh')
+# params_file_list.append('./number_samples/crossvalidation_number_samples_dense_sameweights')
 
 # external_validation
-params_file_list.append('./external_validation/pnet_validation')
+# params_file_list.append('./external_validation/pnet_validation')
 
+#reviews
+#LOOCV
+params_file_list.append('./review/LOOCV_reg_10_tanh')
+
+#cancer genes
+
+# params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing')
+
+# params_file_list.append('./review/onsplit_average_reg_10_cancer_genes_testing')
+# params_file_list.append('./review/crossvalidation_average_reg_10_tanh_cancer_genes')
 
 
 for params_file in params_file_list:
@@ -66,6 +80,7 @@ for params_file in params_file_list:
     params_file = join(POSTATE_PARAMS_PATH, params_file)
     logging.info('random seed %d' % random_seed)
     params_file_full = params_file + '.py'
+    print params_file_full
     params = imp.load_source(params_file, params_file_full)
 
     DebugFolder(log_dir)
@@ -82,8 +97,12 @@ for params_file in params_file_list:
         pipeline = TrainValidatePipeline(data_params=params.data,  model_params=params.models, pre_params=params.pre,
                                          feature_params=params.features, pipeline_params=params.pipeline, exp_name=log_dir)
 
+    elif params.pipeline['type'] == 'LOOCV':
+        pipeline = LeaveOneOutPipeline(task=params.task, data_params=params.data, feature_params=params.features,
+                                           model_params=params.models, pre_params=params.pre,
+                                           pipeline_params=params.pipeline, exp_name=log_dir)
     start = timeit.default_timer()
     pipeline.run()
     stop = timeit.default_timer()
     mins, secs = elapsed_time(start, stop)
-    logging.info('Epoch Time: {}m {}s'.format(mins,secs))
+    logging.info('Elapsed Time: {}m {}s'.format(mins,secs))
