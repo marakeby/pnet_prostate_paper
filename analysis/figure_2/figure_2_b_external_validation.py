@@ -8,6 +8,7 @@ from os.path import join
 import numpy as np
 from matplotlib import colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from config_path import PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
 
 def plot_(primary):
     percent = 100*primary/sum(primary)
@@ -113,8 +114,9 @@ def plot_stacked(ax, filename, correct, wrong):
 #     print saving_filename
 #     plt.savefig(saving_filename)
 
-primary = np.array([95,35])
-mets = np.array([72,23])
+#primary = np.array([95,35])
+
+
 
 def plot_external_validation_all(ax):
     plot_stacked(ax, '', primary, mets)
@@ -176,6 +178,16 @@ def plot_external_validation_matrix(ax):
     ax2.set_xticks([])
 
 
+dir_name = join(PROSTATE_LOG_PATH, 'external_validation/pnet_validation')
+primary_filename = join(dir_name, 'P-net__primary_testing.csv')
+met_filename = join(dir_name, 'P-net__mets_testing.csv')
+primary_df = pd.read_csv(primary_filename)
+met_df = pd.read_csv(met_filename)
+primary = [sum(primary_df.pred == False), sum(primary_df.pred == True)]
+mets = [sum(met_df.pred == False), sum(met_df.pred == True)]
+primary = np.array(primary)
+mets = np.array(mets)
+
 def run_externnal_validation():
     plot_(primary)
     filename= join(saving_dir, 'external_validation_primary.png')
@@ -198,6 +210,12 @@ def run_externnal_validation():
     filename= join(saving_dir, 'external_validation_matrix.png')
     plt.savefig(filename, dpi=200)
 
+
 if __name__ =='__main__':
+
+    # primary = np.array([95,35])
+    #mets = np.array([72,23])
+
+    
     run_externnal_validation()
     

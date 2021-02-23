@@ -16,6 +16,7 @@ cnv_filename = 'P1000_data_CNA_paper.csv'
 response_filename = 'response_paper.csv'
 gene_important_mutations_only = 'P1000_final_analysis_set_cross_important_only.csv'
 gene_truncating_mutations_only = 'P1000_final_analysis_set_cross_truncating_only.csv'
+gene_expression = 'P1000_data_tpm.csv'
 
 cached_data = {}
 
@@ -159,6 +160,9 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
         x, response, info, genes = load_data(cnv_filename, selected_genes)
         x[x == -2.] = 1.0
         x[x != -2.] = 0.0
+
+    if data_type == 'gene_expression':
+        x, response, info, genes = load_data(gene_expression, selected_genes)
 
     return x, response, info, genes
 

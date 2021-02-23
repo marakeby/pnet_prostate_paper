@@ -74,7 +74,7 @@ model_name = 'onsplit_average_reg_10_tanh_large_testing'
 
 importance_type = ['deepexplain_deeplift']
 target = 'o6'
-use_data = 'All' #{'Train', 'Test'}
+use_data = 'Test' #{'All', 'Train', 'Test'}
 dropAR = False
 
 def run():

@@ -21,7 +21,7 @@ def construct_model(model_params_dict):
     model_type = model_params_dict['type']
     p = model_params_dict['params']
     # logging.info ('model type: ', str(model_type))
-    logging.info('model paramters: '.format(p))
+    # logging.info('model paramters: {}'.format(p))
 
     if model_type == 'svr':
         model = svm.SVR(max_iter=5000, **p)

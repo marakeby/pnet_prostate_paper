@@ -46,6 +46,7 @@ def get_layer_maps(genes, n_levels, direction, add_unk_genes):
         filter_df = pd.DataFrame(index=filtering_index)
         print 'filtered_map', filter_df.shape
         filtered_map = filter_df.merge(mapp, right_index=True, left_index=True, how='left')
+        # filtered_map = filter_df.merge(mapp, right_index=True, left_index=True, how='inner')
         print 'filtered_map', filter_df.shape
         # filtered_map = filter_df.merge(mapp, right_index=True, left_index=True, how='inner')
 
