@@ -144,17 +144,14 @@ def get_coef_from_model(model):
     coef = None
     if hasattr(model, 'coef_'):
         if type(model.coef_) == list:
-            # coef_ = self.model.coef_[0]
-            # coef_ = self.model.coef_
             coef = [get_coef(c) for c in model.coef_]
-            # coef = [c for c in model.coef_]
+        elif type(model.coef_) == dict:
+            coef = [get_coef(model.coef_[c]) for c in model.coef_.keys()]
         else:
             coef = get_coef(model.coef_)
-        # coef =self.model.coef_
 
     if hasattr(model, 'scores_'):
         coef = model.scores_
-        print len(coef)
 
     if hasattr(model, 'feature_importances_'):
         coef = np.abs(model.feature_importances_)

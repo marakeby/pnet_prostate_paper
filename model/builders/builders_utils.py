@@ -87,13 +87,10 @@ def shuffle_genes_map(mapp):
 def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, activation_decision, w_reg,
              w_reg_outcomes, dropout, sparse, add_unk_genes, batch_normal, kernel_initializer, use_bias=False,
              shuffle_genes=False, attention=False, dropout_testing=False, non_neg=False, sparse_first_layer=True):
-    feature_names = []
+    feature_names = {}
     n_features = len(features)
     n_genes = len(genes)
-    # kernel_initializer = VarianceScaling()
-    # kernel_initializer = None
-    # reg_l= L1L2
-    # reg_l= L1L2
+
     if not type(w_reg) == list:
         w_reg = [w_reg] * 10
 
@@ -107,7 +104,6 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
     w_reg_outcome0 = w_reg_outcomes[0]
     w_reg_outcome1 = w_reg_outcomes[1]
     reg_l = l2
-    # reg_l= l1
     constraints = {}
     if non_neg:
         from keras.constraints import nonneg
@@ -209,13 +205,14 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
             logging.info('n_genes, n_pathways {} {} '.format(n_genes, n_pathways))
             # print 'map # ones {}'.format(np.sum(mapp))
             print 'layer {}, dropout  {} w_reg {}'.format(i, dropout, w_reg)
+            layer_name = 'h{}'.format(i + 1)
             if sparse:
                 hidden_layer = SparseTF(n_pathways, mapp, activation=activation, W_regularizer=reg_l(w_reg),
-                                        name='h{}'.format(i + 1), kernel_initializer=kernel_initializer,
+                                        name=layer_name, kernel_initializer=kernel_initializer,
                                         use_bias=use_bias, **constraints)
             else:
                 hidden_layer = Dense(n_pathways, activation=activation, W_regularizer=reg_l(w_reg),
-                                     name='h{}'.format(i + 1), kernel_initializer=kernel_initializer, **constraints)
+                                     name=layer_name, kernel_initializer=kernel_initializer, **constraints)
 
             outcome = hidden_layer(outcome)
 
@@ -238,7 +235,10 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
             decision_outcomes.append(decision_outcome)
             drop2 = Dropout(dropout, name='dropout_{}'.format(i + 1))
             outcome = drop2(outcome, training=dropout_testing)
-            feature_names.append(names)
 
-        feature_names.append(maps[-1].index)
+            feature_names['h{}'.format(i)] = names
+            # feature_names.append(names)
+        i= len(maps)
+        feature_names['h{}'.format(i-1)] = maps[-1].index
+        # feature_names.append(maps[-1].index)
     return outcome, decision_outcomes, feature_names

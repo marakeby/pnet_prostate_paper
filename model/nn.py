@@ -235,8 +235,11 @@ class Model(BaseEstimator):
                                  batch_size=self.batch_size,
                                  verbose=self.verbose, callbacks=callbacks,
                                  shuffle=self.shuffle, class_weight=class_weights)
-        plot_history(history.history, self.save_filename + '_validation')
 
+        '''
+        saving history
+        '''
+        plot_history(history.history, self.save_filename + '_validation')
         hist_df = pd.DataFrame(history.history)
         with open(self.save_filename + '_train_history.csv', mode='w') as f:
             hist_df.to_csv(f)
@@ -389,12 +392,17 @@ class Model(BaseEstimator):
         if not hasattr(self, 'feature_names'):
             return self.coef_
         coef = self.coef_
-        coef_dfs = []
-        for c, names in zip(coef, self.feature_names):
+        coef_dfs = {}
+        common_keys = set(coef.keys()).intersection(self.feature_names.keys())
+        for k in common_keys:
+            c= coef[k]
+            names = self.feature_names[k]
+        # for c, names in zip(coef, self.feature_names):
             # print (c)
             # print (len(names))
             df = pd.DataFrame(c.ravel(), index=names, columns=['coef'])
-            coef_dfs.append(df)
+            # coef_dfs.append(df)
+            coef_dfs[k] = df
         return coef_dfs
 
     def get_coef(self):

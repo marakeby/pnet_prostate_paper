@@ -219,8 +219,12 @@ def get_shap_scores(model, X_train, y_train, target=-1, method_name='deepexplain
 
 
 def get_deep_explain_scores(model, X_train, y_train, target=-1, method_name='grad*input', detailed=False, **kwargs):
-    gradients_list = []
-    gradients_list_sample_level = []
+    # gradients_list = []
+    # gradients_list_sample_level = []
+
+    gradients_list = {}
+    gradients_list_sample_level = {}
+
     i = 0
     for l in get_layers(model):
         if type(l) in [Sequential, Dropout, BatchNormalization]:
@@ -248,8 +252,10 @@ def get_deep_explain_scores(model, X_train, y_train, target=-1, method_name='gra
                 # feature_weights = np.abs(gradients)
                 feature_weights = gradients
                 # feature_weights = np.mean(gradients)
-            gradients_list.append(feature_weights)
-            gradients_list_sample_level.append(gradients)
+            # gradients_list.append(feature_weights)
+            # gradients_list_sample_level.append(gradients)
+            gradients_list[l.name] = feature_weights
+            gradients_list_sample_level[l.name] = gradients
     if detailed:
         return gradients_list, gradients_list_sample_level
     else:
