@@ -282,6 +282,11 @@ class OneSplitPipeline:
                     for i, c in enumerate(coef):
                         if type(c) == pd.DataFrame:
                             c.to_csv(file_name + '_layer' + str(i) + '.csv')
+                elif type(coef) == dict:
+                    for c in coef.keys():
+                        if type(coef[c]) == pd.DataFrame:
+                            coef[c].to_csv(file_name + '_layer' + str(c) + '.csv')
+
             if type(c_) == list or type(c_) == tuple:
                 coef_df[model_name_col] = c_[0]
             else:
