@@ -9,6 +9,7 @@ import logging
 # from data.simul   ated.data_reader import SimulatedData
 # from data.tcga_skcm.data_reader import SKCMData
 # from data.prostate_jake.data_reader import ProstateDataJake
+from data.melanoma.data_reader_melanoma import MelanomaData
 from data.prostate_paper.data_reader import ProstateDataPaper
 # from data.tcga_skcm.data_reader import SKCMData
 import numpy as np
@@ -23,6 +24,8 @@ import numpy as np
 # from data.melanoma_io.data_reader import Mel_IO
 # from data.profile.data_reader import ProfileData
 # from data.prostate.data_reader import ProstateData
+from data.tcga_skcm.data_reader_tcga_skcm import SKCMData
+
 
 class Data():
     def __init__(self, id, type, params, test_size=0.3, stratify=True):
@@ -35,6 +38,12 @@ class Data():
 
         if self.data_type == 'prostate_paper':
             self.data_reader = ProstateDataPaper(**params)
+
+        elif self.data_type == 'melanoma':
+            self.data_reader = MelanomaData(**params)
+
+        elif self.data_type == 'tcga_skcm':
+            self.data_reader = SKCMData(**params)
 
         else:
             logging.error('unsupported data type')
