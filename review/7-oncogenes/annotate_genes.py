@@ -1,15 +1,11 @@
-import sys
 import os
-from os.path import dirname, realpath, join
-# base_dir = dirname(dirname(__file__))
-# sys.path.insert(0, base_dir)
-from config_path import PROSTATE_DATA_PATH, PLOTS_PATH, BASE_PATH
 import numpy as np
 import pandas as pd
-from os.path import join
+from os.path import join, basename, dirname
 from matplotlib import pyplot as plt
-print(PROSTATE_DATA_PATH)
+from config_path import PROSTATE_DATA_PATH, PLOTS_PATH, BASE_PATH
 
+print(PROSTATE_DATA_PATH)
 extracted_dir = join(BASE_PATH,'analysis/figure_3/extracted')
 
 print (extracted_dir)
@@ -58,6 +54,11 @@ plt.tick_params(
 
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
-saving_dir = join(PLOTS_PATH, 'reviews')
+
+current_dir= basename(dirname(__file__))
+saving_dir = join(PLOTS_PATH, 'reviews/{}'.format(current_dir))
+if not os.path.exists(saving_dir):
+    os.mkdir(saving_dir)
+
 filename = join(saving_dir,'7-all_genes.png')
 plt.savefig(filename, dpi = 200)

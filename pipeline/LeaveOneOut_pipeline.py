@@ -116,7 +116,11 @@ class LeaveOneOutPipeline(OneSplitPipeline):
         #     prediction.append(x)
         #     print ('------------- {} ---------------'.format(len(prediction)))
         fold_ids = range(len(folds))
-        f = partial(eval_model, model_params, X, y, info, folds)
+        model = get_model(model_params)
+        # model = deepcopy(model)
+        # eval_model(model, X, y, info, folds, 10)
+
+        f = partial(eval_model, model, X, y, info ,folds, self.directory, model_name)
 
         p= mp.Pool(5)
         prediction = p.map(f,fold_ids )
@@ -156,21 +160,31 @@ def predict( model, x_test):
     return y_pred_test, y_pred_test_scores
 
 
-def eval_model( model_params, X, y, info, folds, fold_id):
+def eval_model( empty_model, X, y, info, folds, saving_dir, model_name, fold_id):
 
     print('fold # {}'.format(fold_id))
     train_index, test_index = folds[fold_id]
-    model = get_model(model_params)
+    # model = get_model(model_params)
+    model = deepcopy(empty_model)
     x_train, x_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
-    # info_train = pd.DataFrame(index=info[train_index])
     info_test = pd.DataFrame(index=info[test_index])
+    # info_train = pd.DataFrame(index=info[train_index])
+    #initial prediction before training (should be approximately random)
+    # y_pred_test, y_pred_test_scores = predict(model, x_test)
+    # info_test['y_pred_test_scores_init'] = y_pred_test_scores
+    # info_test['y_pred_test_init'] = y_pred_test
+
     # x_train, x_test = self.preprocess(x_train, x_test)
     # x_train, x_test = self.extract_features(x_train, x_test)
+
+
     model = model.fit(x_train, y_train)
     y_pred_test, y_pred_test_scores = predict(model, x_test)
     info_test['y_pred_test_scores'] = y_pred_test_scores
     info_test['y_pred_test'] = y_pred_test
     info_test['y_test'] = y_test
+    filename = join(saving_dir, '{}_{}.csv'.format(model_name, fold_id))
+    info_test.to_csv(filename)
     return info_test
 

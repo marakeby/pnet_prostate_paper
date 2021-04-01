@@ -8,7 +8,7 @@ sys.path.insert(0, dirname(current_dir))
 
 import datetime
 from utils.logs import set_logging, DebugFolder
-from config_path import PROSTATE_LOG_PATH, POSTATE_PARAMS_PATH
+from config_path import MELANOMA_LOG_PATH, MELANOMA_PARAMS_PATH
 from pipeline.train_validate import TrainValidatePipeline
 from pipeline.one_split import OneSplitPipeline
 from pipeline.crossvalidation_pipeline import CrossvalidationPipeline
@@ -41,62 +41,50 @@ def elapsed_time(start_time, end_time):
 params_file_list = []
 
 # pnet
-params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
-params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing_inner')
-params_file_list.append('./pnet/crossvalidation_average_reg_10_tanh')
+# params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
+# params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing_inner')
+# params_file_list.append('./pnet/crossvalidation_average_reg_10_tanh')
 
 # other ML models
-params_file_list.append('./compare/onsplit_ML_test')
-params_file_list.append('./compare/crossvalidation_ML_test')
+# params_file_list.append('./compare/onsplit_ML_test')
+# params_file_list.append('./compare/crossvalidation_ML_test')
 
 # dense
-params_file_list.append('./dense/onesplit_number_samples_dense_sameweights')
-params_file_list.append('./dense/onsplit_dense')
+# params_file_list.append('./dense/onesplit_number_samples_dense_sameweights')
+# params_file_list.append('./dense/onsplit_dense')
 
 # number_samples
-params_file_list.append('./number_samples/crossvalidation_average_reg_10')
-## params_file_list.append('./number_samples/crossvalidation_average_reg_10_tanh')
-params_file_list.append('./number_samples/crossvalidation_number_samples_dense_sameweights')
+# params_file_list.append('./number_samples/crossvalidation_average_reg_10')
+# ## params_file_list.append('./number_samples/crossvalidation_average_reg_10_tanh')
+# params_file_list.append('./number_samples/crossvalidation_number_samples_dense_sameweights')
 
 # external_validation
-params_file_list.append('./external_validation/pnet_validation')
+# params_file_list.append('./external_validation/pnet_validation')
 
-#reviews------------------------------------
+#reviews
 #LOOCV
-params_file_list.append('./review/LOOCV_reg_10_tanh')
-#ge
-params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing_ge')
-#fusion
-params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_TMB')
-params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_fusion')
-params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_fusion_zero')
-params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_inner_fusion_genes')
-
-#single copy
-params_file_list.append('./review/9single_copy/onsplit_average_reg_10_tanh_large_testing_single_copy')
-params_file_list.append('./review/9single_copy/crossvalidation_average_reg_10_tanh_single_copy')
-
-#custom arch
-params_file_list.append('./review/10custom_arch/onsplit_kegg')
-
-#learning rate
-params_file_list.append('./review/learning_rate/onsplit_average_reg_10_tanh_large_testing_inner_LR')
-
+# params_file_list.append('./review/LOOCV_reg_10_tanh')
+# params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing_ge')
+# params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_TMB')
+# params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_fusion')
 
 #cancer genes
+
 # params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing')
+
 # params_file_list.append('./review/onsplit_average_reg_10_cancer_genes_testing')
 # params_file_list.append('./review/crossvalidation_average_reg_10_tanh_cancer_genes')
 
 # melanoma
+params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing_inner')
 
 
 
 for params_file in params_file_list:
-    log_dir = join(PROSTATE_LOG_PATH, params_file)
+    log_dir = join(MELANOMA_LOG_PATH, params_file)
     log_dir = log_dir
     set_logging(log_dir)
-    params_file = join(POSTATE_PARAMS_PATH, params_file)
+    params_file = join(MELANOMA_PARAMS_PATH, params_file)
     logging.info('random seed %d' % random_seed)
     params_file_full = params_file + '.py'
     print params_file_full

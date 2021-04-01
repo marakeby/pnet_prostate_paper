@@ -11,14 +11,12 @@ from model.builders.prostate_models import build_pnet2
 # print base_dirname
 # filename = os.path.basename(__file__)
 task = 'classification_binary'
-# selected_genes =  'tcga_prostate_expressed_genes_and_cancer_genes.csv'
-selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes_and_memebr_of_reactome.csv'
-
+selected_genes =  'tcga_prostate_expressed_genes_and_cancer_genes.csv'
 data_base = {'id':'ALL', 'type': 'prostate_paper' ,
            'params': {
                'data_type' : ['mut_important', 'cnv_del', 'cnv_amp'],
                'drop_AR': False,
-               'cnv_levels':3,
+               'cnv_levels':5,
                'mut_binary':True,
                'balanced_data': False,
                'combine_type':'union',#intersection
@@ -75,18 +73,17 @@ nn_pathway = {
                                   reduce_lr = False,
                                   reduce_lr_after_nepochs = dict(drop=0.25, epochs_drop=50),
                                   lr = 0.001,
-                                  max_f1=False
+                                  max_f1=True
                                   ),
-         # 'feature_importance': 'deepexplain_grad*input'
+         'feature_importance': 'deepexplain_grad*input'
          },
 }
 features = {}
-# models=[nn_pathway]
-models=[]
+models=[nn_pathway]
 
 class_weight ={0: 0.75, 1: 1.5}
 logistic = {'type': 'sgd', 'id': 'Logistic Regression', 'params': {'loss': 'log', 'penalty': 'l2', 'alpha': 0.01, 'class_weight':class_weight}}
-models.append(nn_pathway)
+models.append(logistic)
 
 # pipeline = {'type':  'one_split', 'params': { 'save_train' : True, 'eval_dataset': 'test'}}
-pipeline = {'type':  'LOOCV', 'params': { 'save_train' : False, 'eval_dataset': 'test'}}
+pipeline = {'type':  'crossvalidation', 'params': {'n_splits': 5, 'save_train' : True}}

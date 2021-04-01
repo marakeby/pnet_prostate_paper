@@ -7,6 +7,37 @@ from sklearn import metrics
 from sklearn.metrics import average_precision_score
 
 
+def plot_auc_bootstrap(all_models_dict, ax):
+    n = len(all_models_dict.keys())
+    import seaborn as sns
+    colors = sns.color_palette(None, n)
+
+    all_scores=[]
+    names=[]
+    xs=[]
+    avg_scores=[]
+    for i, k in enumerate(all_models_dict.keys()):
+        df = all_models_dict[k]
+        y_test = df['y']
+        y_pred_score = df['pred_score']
+        score, ci_lower, ci_upper, scores = score_ci(y_test, y_pred_score, score_fun=metrics.roc_auc_score,
+                                                     n_bootstraps=1000, seed=123)
+        all_scores.append(scores)
+        names.append(k)
+        xs.append(np.random.normal(i + 1, 0.04, len(scores)))
+        avg_scores.append(score)
+
+    all_scores = [x for _, x in sorted(zip(avg_scores, all_scores))]
+    names = [x for _, x in sorted(zip(avg_scores, names ))]
+
+    ax.boxplot(all_scores, labels= names)
+    ngroup = len(all_scores)
+    clevels = np.linspace(0., 1., ngroup)
+    from matplotlib import cm
+    for i, (x, val, clevel) in enumerate(zip(xs, all_scores, clevels)):
+        plt.scatter(x, val,marker='.', color=colors[i], alpha=0.1)
+
+
 def plot_roc(fig, y_test, y_pred_score, save_dir, label=''):
     fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_score, pos_label=1)
     roc_auc = metrics.auc(fpr, tpr)
