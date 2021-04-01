@@ -16,7 +16,10 @@ cnv_filename = 'P1000_data_CNA_paper.csv'
 response_filename = 'response_paper.csv'
 gene_important_mutations_only = 'P1000_final_analysis_set_cross_important_only.csv'
 gene_truncating_mutations_only = 'P1000_final_analysis_set_cross_truncating_only.csv'
-gene_expression = 'P1000_data_tpm.csv'
+# gene_expression = 'P1000_data_tpm.csv'
+gene_expression = 'P1000_adjusted_TPM.csv'
+fusions_filename = 'p1000_onco_ets_fusions.csv'
+fusions_genes_filename = 'fusion_genes.csv'
 
 cached_data = {}
 
@@ -164,6 +167,14 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
     if data_type == 'gene_expression':
         x, response, info, genes = load_data(gene_expression, selected_genes)
 
+    if data_type == 'fusions':
+        x, response, info, genes = load_data(fusions_filename, None)
+        # x.loc[:, :] = 0.
+
+    if data_type == 'fusion_genes':
+        x, response, info, genes = load_data(fusions_genes_filename, selected_genes)
+        # x.loc[:,:]=0.
+
     return x, response, info, genes
 
 
@@ -238,11 +249,13 @@ def split_cnv(x_df):
 
 class ProstateDataPaper():
 
-    def __init__(self, data_type='mut', cnv_levels=5, cnv_filter_single_event=True, mut_binary=False,
-                 selected_genes=None, combine_type='intersection', use_coding_genes_only=False, drop_AR=False,
-                 balanced_data=False, cnv_split=False, shuffle=False, training_split=0):
+    def __init__(self, data_type='mut', account_for_data_type=None,cnv_levels=5,
+                 cnv_filter_single_event=True, mut_binary=False,
+                 selected_genes=None, combine_type='intersection',
+                 use_coding_genes_only=False, drop_AR=False,
+                 balanced_data=False, cnv_split=False,
+                 shuffle=False, selected_samples=None, training_split=0):
 
-        TMB = False
         self.training_split = training_split
         if not selected_genes is None:
             selected_genes_file= join(data_path, 'genes')
@@ -255,12 +268,6 @@ class ProstateDataPaper():
             y_list = []
             rows_list = []
             cols_list = []
-            if 'TMB' in data_type:
-                data_type = deepcopy(data_type)
-                data_type.remove('TMB')
-                TMB = True
-            else:
-                TMB = False
 
             for t in data_type:
                 x, y, rows, cols = load_data_type(t, cnv_levels, cnv_filter_single_event, mut_binary, selected_genes)
@@ -320,20 +327,45 @@ class ProstateDataPaper():
             y = y[ind, :]
             rows = rows[ind]
 
-        if TMB:
-            x_tmb, y_tmb, rows_tmb, cols_tmb = load_data_type('TMB', cnv_levels, cnv_filter_single_event, mut_binary,
-                                                              selected_genes)
-            print type(x), type(x_tmb)
-            x_df = pd.DataFrame(x, index=rows, columns=cols)
-            n = len(data_type)
-            columns = [('TMB1', 'TMB2')] * n
-            x_tmb = np.tile(x_tmb, (n, 1))
-            x_tmb = pd.DataFrame(x_tmb.T, index=rows_tmb, columns=columns)
+        if account_for_data_type is not None:
+            x_genomics = pd.DataFrame(x, columns = cols, index= rows)
+            y_genomics = pd.DataFrame(y,  index= rows, columns=['response'])
+            x_list = []
+            y_list = []
+            rows_list = []
+            cols_list = []
+            for t in account_for_data_type:
+                x_, y_, rows_, cols_ = load_data_type(t, cnv_levels, cnv_filter_single_event, mut_binary, selected_genes)
+                x_df = pd.DataFrame(x_, columns=cols_, index=rows_)
+                x_list.append(x_df), y_list.append(y_), rows_list.append(rows_), cols_list.append(cols_)
 
-            joined_df = pd.concat([x_df, x_tmb], axis=1, join='inner')
-            x = joined_df.values
-            rows = joined_df.index
-            cols = joined_df.columns
+            x_account_for = pd.concat(x_list, keys=account_for_data_type, join='inner', axis=1)
+            x_all = pd.concat([x_genomics, x_account_for], keys=['genomics', 'account_for'], join='inner', axis=1)
+
+            common_samples = set(rows).intersection(x_all.index)
+            x_all = x_all.loc[common_samples,:]
+            y = y_genomics.loc[common_samples,:]
+
+            y = y['response'].values
+            x= x_all.values
+            cols= x_all.columns
+            rows= x_all.index
+
+        if selected_samples is not None:
+            selected_samples_file = join(processed_path, selected_samples)
+            df = pd.read_csv(selected_samples_file, header=0)
+            selected_samples_list = list(df['Tumor_Sample_Barcode'])
+
+            x = pd.DataFrame(x, columns = cols, index= rows)
+            y = pd.DataFrame(y,  index= rows, columns=['response'])
+
+            x=x.loc[selected_samples_list,:]
+            y=y.loc[selected_samples_list,:]
+            rows = x.index
+            cols = x.columns
+            y=y['response'].values
+            x = x.values
+
 
         self.x = x
         self.y = y
@@ -355,9 +387,18 @@ class ProstateDataPaper():
 
         validation_set = pd.read_csv(join(splits_path, 'validation_set.csv'))
         testing_set = pd.read_csv(join(splits_path, 'test_set.csv'))
-        ind_train = info.isin(training_set.id)
-        ind_validate = info.isin(validation_set.id)
-        ind_test = info.isin(testing_set.id)
+
+        info_train = list(set(info).intersection(training_set.id))
+        info_validate = list(set(info).intersection(validation_set.id))
+        info_test = list(set(info).intersection(testing_set.id))
+
+        ind_train = info.isin(info_train)
+        ind_validate = info.isin(info_validate)
+        ind_test = info.isin(info_test)
+
+        # ind_train = info.isin(training_set.id)
+        # ind_validate = info.isin(validation_set.id)
+        # ind_test = info.isin(testing_set.id)
 
         x_train = x[ind_train]
         x_test = x[ind_test]
