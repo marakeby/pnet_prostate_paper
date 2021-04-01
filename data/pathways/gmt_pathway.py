@@ -23,7 +23,7 @@ def get_KEGG_map(input_list, filename='c2.cp.kegg.v6.1.symbols.gmt', genes_col=1
     mapp = mapp.fillna(0)
     genes = mapp.index
     pathways = mapp.columns
-    mapp = mapp.as_matrix()
+    mapp = mapp.values
 
     if shuffle_genes:
         logging.info('shuffling')
