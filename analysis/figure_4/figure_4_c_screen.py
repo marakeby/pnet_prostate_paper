@@ -18,7 +18,8 @@ def run():
   df.head()
   df = df.groupby(by=df.index).max().sort_values('Z-LFC AVERAGE Enzalutimide')
 
-
+  print df.head()
+  print df.head(-5)
   fig = plt.figure(figsize =(4,4))
 
 
@@ -65,9 +66,7 @@ def run():
   ax3.set_xticks([])
 
   ax2.set_ylabel('Z-score (CSS+enza)',  fontdict=dict(weight='bold', fontsize=12))
-  # interesting = [ 'COL1A2', 'PPP2R2A', 'FGFR1', 'AR','RB1', 'MAML3', 'MDM4', 'TP53', 'PTEN']
   interesting = [ 'AR', 'TP53', 'PTEN', 'RB1','MDM4', 'FGFR1', 'MAML3', 'PDGFA', 'NOTCH1', 'EIF3E']
-  # interesting = [ 'AR', 'TP53', 'PTEN', 'RB1','MDM4', 'FGFR1', 'MAML3', 'PDGFA',  'EIF3E']
 
   texts=[]
   #

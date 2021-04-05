@@ -15,6 +15,8 @@ gene_final_no_silent_no_intron = 'P1000_final_analysis_set_cross__no_silent_no_i
 cnv_filename = 'P1000_data_CNA_paper.csv'
 response_filename = 'response_paper.csv'
 gene_important_mutations_only = 'P1000_final_analysis_set_cross_important_only.csv'
+gene_important_mutations_only_plus_hotspots = 'P1000_final_analysis_set_cross_important_only_plus_hotspots.csv'
+gene_hotspots = 'P1000_final_analysis_set_cross_hotspots.csv'
 gene_truncating_mutations_only = 'P1000_final_analysis_set_cross_truncating_only.csv'
 # gene_expression = 'P1000_data_tpm.csv'
 gene_expression = 'P1000_adjusted_TPM.csv'
@@ -97,6 +99,15 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
         if mut_binary:
             logging.info('mut_binary = True')
             x[x > 1.] = 1.
+
+    if data_type == 'mut_important_plus_hotspots':
+        x, response, info, genes = load_data(gene_important_mutations_only_plus_hotspots, selected_genes)
+        # if mut_binary:
+        #     logging.info('mut_binary = True')
+        #     x[x > 1.] = 1.
+    if data_type == 'mut_hotspots':
+        x, response, info, genes = load_data(gene_hotspots, selected_genes)
+
     if data_type == 'truncating_mut':
         x, response, info, genes = load_data(gene_truncating_mutations_only, selected_genes)
         if mut_binary:
@@ -258,10 +269,15 @@ class ProstateDataPaper():
 
         self.training_split = training_split
         if not selected_genes is None:
-            selected_genes_file= join(data_path, 'genes')
-            selected_genes_file= join(selected_genes_file, selected_genes)
-            df = pd.read_csv(selected_genes_file, header=0)
-            selected_genes = list(df['genes'])
+            if type(selected_genes) == list:
+                #list of genes
+                selected_genes = selected_genes
+            else:
+                # file that will be used to load list of genes
+                selected_genes_file= join(data_path, 'genes')
+                selected_genes_file= join(selected_genes_file, selected_genes)
+                df = pd.read_csv(selected_genes_file, header=0)
+                selected_genes = list(df['genes'])
 
         if type(data_type) == list:
             x_list = []
