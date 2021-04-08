@@ -113,7 +113,6 @@ def plot_auc_all(all_models_dict, ax):
     # sort based on area under prc
     n = len(all_models_dict.keys())
     colors = sns.color_palette(None, n)
-
     sorted_dict = sort_dict(all_models_dict)
     for i, k in enumerate(sorted_dict.keys()):
         print('model {} , auc= {}'.format(k, sorted_dict[k]))

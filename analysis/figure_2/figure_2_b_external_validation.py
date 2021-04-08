@@ -90,7 +90,7 @@ def plot_stacked(ax, filename, correct, wrong):
     top_strs = ['%1.2f' % i + '%' for i in top]
 
     table = ax.table(cellText=[bottom_strs, top_strs],
-                      rowLabels=['True Rate', 'Error Rate'],
+                      rowLabels=['True Ra   te', 'Error Rate'],
                       rowColours=selected_colors,
                       colLabels=labels,
                       loc='bottom', fontsize=14, cellLoc='center')
@@ -125,7 +125,8 @@ def plot_external_validation_all(ax):
 
 def plot_external_validation_matrix(ax):
     normalize = True
-    labels = np.array([['TR', 'TR'], ['ER ', 'ER']])
+    # labels = np.array([['TR', 'TR'], ['ER ', 'ER']])
+    labels = np.array([['TN', 'FP'], ['FN ', 'TP']])
     cmap = plt.cm.Reds
     cm = np.array([primary, mets])
 

@@ -129,10 +129,12 @@ def plot_confusion_matrix_all(ax):
     models_base_dir = join(base_dir, 'onsplit_average_reg_10_tanh_large_testing')
     filename = join(models_base_dir, 'P-net_ALL_testing.csv')
     df = pd.read_csv(filename, index_col=0)
-    df.pred = df.pred_scores > 0.5
+
+    # df.pred = df.pred_scores > 0.5
     df.head()
 
     y_t = df.y
+
     y_pred_test = df.pred
     cnf_matrix = confusion_matrix(y_t, y_pred_test)
     print cnf_matrix

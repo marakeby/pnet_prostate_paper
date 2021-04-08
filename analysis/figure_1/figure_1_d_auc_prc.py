@@ -86,7 +86,7 @@ for i, m in enumerate(models):
 
 pnet_base_dir = join(base_dir , 'pnet/onsplit_average_reg_10_tanh_large_testing')
 df_pnet = pd.read_csv(join(pnet_base_dir, 'P-net_ALL_testing.csv'), sep=',', index_col=0, header=[0, 1])
-all_models_dict['P-net'] = df_pnet
+all_models_dict['P-NET'] = df_pnet
 n = len(models)+1
 
 def plot_prc_all(ax):

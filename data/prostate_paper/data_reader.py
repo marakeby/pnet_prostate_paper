@@ -127,7 +127,7 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
                     x[x == -1.] = 0.0
                     x[x == -2.] = 1.0
                     x[x == 1.] = 0.0
-                    x[x == -2.] = 1.0
+                    x[x == 2.] = 1.0
                 else:
                     x[x < 0.] = -1.
                     x[x > 0.] = 1.

@@ -87,7 +87,7 @@ def plot_compaison(ax1, label, df_pnet, df_dense):
     # ax1.set_xlabel('Number of samples', fontdict=dict(weight='bold', fontsize=10))
     ax1.set_ylabel(label, fontdict=dict(family='Arial',weight='bold', fontsize=14))
 
-    ax1.legend(['P-net', 'Dense'], fontsize=8, loc= 'upper left')
+    ax1.legend(['P-NET', 'Dense'], fontsize=8, loc= 'upper left')
 
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     # ax1.grid()

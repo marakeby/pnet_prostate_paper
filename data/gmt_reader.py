@@ -15,7 +15,7 @@ class GMT():
 
             data_list = gmt.readlines()
 
-            print data_list[0]
+            # print data_list[0]
             for row in data_list:
                 genes = row.strip().split('\t')
                 genes = [re.sub('_copy.*', '', g) for g in genes]
@@ -26,7 +26,7 @@ class GMT():
                     data_dict_list.append(dict)
 
         df = pd.DataFrame(data_dict_list)
-        print df.head()
+        # print df.head()
 
         return df
 
@@ -37,7 +37,7 @@ class GMT():
         with open(os.path.join(data_dir, filename)) as gmt:
             data_list = gmt.readlines()
 
-            print data_list[0]
+            # print data_list[0]
             for row in data_list:
                 genes = row.split('\t')
                 dict[genes[0]] = genes[2:]
