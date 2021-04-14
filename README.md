@@ -131,7 +131,13 @@ To get a local copy up and running follow these simple steps.
    ```sh
    conda env create --name pnet_env --file=environments.yml
    ```
+3. Based on your use, you may need to download one or more of the following 
 
+    a. [Data files](https://drive.google.com/file/d/156fypNOfaLOfXUeJbcqF776rqHs6linh/view?usp=sharing) (needed to retrain models). Extract the files under ```_database``` directory. If you like to store it somewhere else, you may need to set the ```DATA_PATH``` variable in ```config_path.py``` accordingly.
+    
+    b. [Log files](https://drive.google.com/file/d/1KioP2VeCe95GN9QKZcHzU-mdeBidcclR/view?usp=sharing) (needed to regenerate paper figures). Extract the files under ```_logs``` directory. If you like to store it somewhere else, you may need to set the ```LOG_PATH``` variable in ```config_path.py``` accordingly.
+    
+    c. [Plots files](https://drive.google.com/file/d/1_jF01QtxyWDHt00AhKOj6hQJeTbUpAAl/view?usp=sharing) (a copy of the paper images). Extract the files under ```_plots``` directory. If you like to store it somewhere else, you may need to set the ```PLOTS_PATH``` variable in ```config_path.py``` accordingly.
 
 
 <!-- USAGE EXAMPLES -->
