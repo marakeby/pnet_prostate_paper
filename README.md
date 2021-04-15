@@ -48,7 +48,7 @@ SOFTWARE.
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![GPL-2.0 License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -67,7 +67,7 @@ SOFTWARE.
     <br />
     <br />
     <br />
-    <a href="https://htmlpreview.github.io/?https://github.com/marakeby/pnet_prostate_paper/blob/master/_plots/figure3/sankey_full.html">View Interactive Demo</a>
+    <a href="https://htmlpreview.github.io/?https://github.com/marakeby/pnet_prostate_paper/blob/master/_plots/figure3/sankey_full.html">view interactive network architecture</a>
     ·
     ·
   </p>
@@ -127,9 +127,9 @@ To get a local copy up and running follow these simple steps.
    ```sh
    git clone https://github.com/marakeby/pnet_prostate_paper.git
    ```
-2. Creat conda environment
+2. Create conda environment
    ```sh
-   conda env create --name pnet_env --file=environments.yml
+   conda env create --name pnet_env --file=environment.yml
    ```
 3. Based on your use, you may need to download one or more of the following 
 
@@ -158,7 +158,7 @@ To get a local copy up and running follow these simple steps.
    cd ./run
    python run_me.py
    ```
-4. To generate paper figures run the differnet files under the 'analysis' directory, e.g. 
+4. To generate paper figures run the different files under the 'analysis' directory, e.g. 
      ```sh
    cd ./analysis
    python figure_1_d_auc_prc.py
@@ -171,7 +171,7 @@ To get a local copy up and running follow these simple steps.
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the GPL-2.0 License License. See `LICENSE` for more information.
 
 
 
