@@ -153,19 +153,23 @@ To get a local copy up and running follow these simple steps.
    export PYTHONPATH=~/pnet_prostate_paper:$PYTHONPATH
    ```
    
-3. To train all models run (time consuming process) 
-   ```sh
-   cd ./run
-   python run_me.py
+3. To generate all paper figures, run 
+     ```sh
+   cd ./analysis
+   python run_it_all.py
    ```
-4. To generate paper figures run the different files under the 'analysis' directory, e.g. 
+   
+4. To generate individual paper figure run the different files under the 'analysis' directory, e.g. 
      ```sh
    cd ./analysis
    python figure_1_d_auc_prc.py
    ```
-
-
-
+   
+5. To re-train all models from scratch run (time consuming process) 
+   ```sh
+   cd ./train
+   python run_me.py
+   ```
 
 
 <!-- LICENSE -->

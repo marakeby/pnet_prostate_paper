@@ -88,11 +88,11 @@ def get_nodes_per_layer_filtered(nodes_per_layer_df, all_node_ids, all_node_labe
     nodes_per_layer_filtered_df.index = nodes_per_layer_filtered_df.index.map(lambda x: mapping_dict[x])
     return nodes_per_layer_filtered_df
 
-features_weights = pd.read_csv(join(module_path,'./extracted/gradient_importance_0.csv'), index_col =[0,1])
-features_weights = features_weights.reset_index()
-features_weights.columns= ['target', 'source', 'value']
-features_weights['layer'] = 0
-features_weights.head()
+# features_weights = pd.read_csv(join(module_path,'./extracted/gradient_importance_0.csv'), index_col =[0,1])
+# features_weights = features_weights.reset_index()
+# features_weights.columns= ['target', 'source', 'value']
+# features_weights['layer'] = 0
+# features_weights.head()
 
 def get_links_with_first_layer():
     '''

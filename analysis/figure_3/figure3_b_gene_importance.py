@@ -8,6 +8,8 @@ import numpy as np
 from os.path import join, dirname, realpath, exists
 from os import makedirs
 
+module_path = dirname(realpath(__file__))
+
 def plot_high_genes_sns(df, col='avg_score', name='', saving_directory='.'):
     df.index=df.index.map(shorten_names)
     x_pos = range(df.shape[0])
@@ -239,12 +241,12 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
     else:
         column = 'coef'
 
-    node_importance = pd.read_csv('extracted/node_importance_graph_adjusted.csv', index_col=0)
+    node_importance = pd.read_csv(join(module_path,'./extracted/node_importance_graph_adjusted.csv'), index_col=0)
     high_nodes = node_importance[node_importance.layer == layer].abs().nlargest(10, columns=[column])
     # high_nodes = node_importance[node_importance.layer == layer].abs().nlargest(10, columns=['coef'])
     features = list(high_nodes.index)
-    response = pd.read_csv('extracted/response.csv', index_col=0)
-    df_in = pd.read_csv('./extracted/gradient_importance_detailed_{}.csv'.format(layer), index_col=0)
+    response = pd.read_csv(join(module_path,'./extracted/response.csv'), index_col=0)
+    df_in = pd.read_csv(join(module_path, './extracted/gradient_importance_detailed_{}.csv').format(layer), index_col=0)
     df_in = df_in.copy()
     df_in = df_in.join(response)
     df_in['group'] = df_in.response
@@ -365,11 +367,11 @@ def shorten_names(name):
         name= name[:60]+'...'
     return name
 
-current_dir = dirname(realpath(__file__))
+
 
 def run():
-    node_importance = pd.read_csv(join(current_dir,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
-    response = pd.read_csv(join(current_dir, 'extracted/response.csv'), index_col=0)
+    node_importance = pd.read_csv(join(module_path,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    response = pd.read_csv(join(module_path, 'extracted/response.csv'), index_col=0)
     print response.head()
     layers = list(node_importance.layer.unique())
     print layers

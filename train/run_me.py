@@ -44,51 +44,55 @@ params_file_list = []
 params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
 params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing_inner')
 params_file_list.append('./pnet/crossvalidation_average_reg_10_tanh')
-
-# other ML models
+#
+# # other ML models
 params_file_list.append('./compare/onsplit_ML_test')
 params_file_list.append('./compare/crossvalidation_ML_test')
-
-# dense
+#
+# # dense
 params_file_list.append('./dense/onesplit_number_samples_dense_sameweights')
 params_file_list.append('./dense/onsplit_dense')
-
-# number_samples
+#
+# # number_samples
 params_file_list.append('./number_samples/crossvalidation_average_reg_10')
 ## params_file_list.append('./number_samples/crossvalidation_average_reg_10_tanh')
 params_file_list.append('./number_samples/crossvalidation_number_samples_dense_sameweights')
-
-# external_validation
+#
+# # external_validation
 params_file_list.append('./external_validation/pnet_validation')
-
-#reviews------------------------------------
-#LOOCV
-params_file_list.append('./review/LOOCV_reg_10_tanh')
-#ge
+#
+# #reviews------------------------------------
+# #LOOCV
+# params_file_list.append('./review/LOOCV_reg_10_tanh')
+# #ge
 params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing_ge')
-#fusion
-params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_TMB')
+# #fusion
+# params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_TMB')
 params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_fusion')
 params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_fusion_zero')
 params_file_list.append('./review/fusion/onsplit_average_reg_10_tanh_large_testing_inner_fusion_genes')
-
-#single copy
+#
+# #single copy
 params_file_list.append('./review/9single_copy/onsplit_average_reg_10_tanh_large_testing_single_copy')
 params_file_list.append('./review/9single_copy/crossvalidation_average_reg_10_tanh_single_copy')
-
-#custom arch
+#
+# #custom arch
 params_file_list.append('./review/10custom_arch/onsplit_kegg')
-
-#learning rate
+#
+# #learning rate
 params_file_list.append('./review/learning_rate/onsplit_average_reg_10_tanh_large_testing_inner_LR')
 
 
-#cancer genes
-# params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing')
-# params_file_list.append('./review/onsplit_average_reg_10_cancer_genes_testing')
-# params_file_list.append('./review/crossvalidation_average_reg_10_tanh_cancer_genes')
+#hotspot
+params_file_list.append('./review/9hotspot/onsplit_average_reg_10_tanh_large_testing_hotspot')
+params_file_list.append('./review/9hotspot/onsplit_average_reg_10_tanh_large_testing_count')
 
-# melanoma
+#cancer genes
+params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing')
+params_file_list.append('./review/onsplit_average_reg_10_cancer_genes_testing')
+params_file_list.append('./review/crossvalidation_average_reg_10_tanh_cancer_genes')
+
+
 
 
 
