@@ -33,6 +33,7 @@ nn_pathway = {
             'model_params': {
                 'use_bias': True,
                 'sparse':False,
+                'sparse_first_layer': True,
                 'w_reg': wregs,
                 'w_reg_outcomes': wreg_outcomes,
                 'dropout': [base_dropout] + [0.1] * (n_hidden_layers + 1),
@@ -51,7 +52,7 @@ nn_pathway = {
                                       select_best_model=False,
                                       monitor='val_o6_f1',
                                       verbose=2,
-                                      epoch=70,
+                                      epoch=300,
                                       shuffle=True,
                                       batch_size=50,
                                       save_name='pnet',
