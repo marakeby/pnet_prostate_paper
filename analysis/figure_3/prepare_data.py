@@ -3,12 +3,12 @@ from os.path import join, dirname, realpath, exists
 from os import makedirs
 current_dir = dirname(dirname(realpath(__file__)))
 sys.path.insert(0, dirname(current_dir))
-
+import numpy as np
 import pandas as pd
 import os
 import sys
 from  config_path import *
-from data_extraction_utils import get_node_importance, get_link_weights, get_link_weights_df, \
+from data_extraction_utils import get_node_importance, get_link_weights, get_link_weights_df_, \
     get_data, get_degrees, adjust_coef_with_graph_degree, get_high_nodes, get_connections, filter_connections
 from utils.loading_utils import DataModelLoader
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
@@ -22,11 +22,14 @@ if not exists(saving_dir):
 
 
 def save_gradient_importance(node_weights_, node_weights_samples_dfs, info):
-    for i, n in enumerate(node_weights_):
+
+    for i, k in enumerate(layers[:-1]):
+        n = node_weights_[k]
         filename = join(saving_dir, 'gradient_importance_{}.csv'.format(i))
         n.to_csv(filename)
 
-    for i, n in enumerate(node_weights_samples_dfs):
+    for i, k in enumerate(layers[:-1]):
+        n = node_weights_samples_dfs[k]
         if i > 0:
             n['ind']= info
             n = n.set_index('ind')
@@ -34,26 +37,30 @@ def save_gradient_importance(node_weights_, node_weights_samples_dfs, info):
             n.to_csv(filename)
 
 
-def save_link_weights(link_weights_df):
-    for i, link in enumerate(link_weights_df):
-        filename = join(saving_dir,'link_weights_{}.csv'.format(i))
+def save_link_weights(link_weights_df, layers):
+
+    for i, l in enumerate(layers):
+        link = link_weights_df[l]
+        filename = join(saving_dir, 'link_weights_{}.csv'.format(i))
         link.to_csv(filename)
-    # df = pd.DataFrame(link_weights[-1], index= feature_names[-1], columns= ['root'])
-    # df.to_csv('./extracted/link_weights_{}.csv'.format(i+1))
+
+
 
 def save_activation(layer_outs_dict, feature_names, info):
+
     for l_name, l_outut in sorted(layer_outs_dict.iteritems()):
         if l_name.startswith('h'):
             print l_name, l_outut.shape
             l = int(l_name[1:])
-            features = feature_names[l + 1]
+            features = feature_names[l_name]
             layer_output_df = pd.DataFrame(l_outut, index=info, columns=features)
             layer_output_df = layer_output_df.round(decimals=3)
             filename = join(saving_dir,'activation_{}.csv'.format(l+1))
             layer_output_df.to_csv(filename)
 
-def save_graph_stats(degrees,fan_outs, fan_ins ):
+def save_graph_stats(degrees,fan_outs, fan_ins, layers ):
     i = 1
+
     df = pd.concat([degrees[0], fan_outs[0]], axis=1)
     df.columns = ['degree', 'fan_out']
     df['fan_in'] = 0
@@ -77,6 +84,8 @@ target = 'o6'
 use_data = 'Test' #{'All', 'Train', 'Test'}
 dropAR = False
 
+layers= ['inputs', 'h0', 'h1', 'h2', 'h3', 'h4', 'h5', 'o_linear6']
+
 def run():
     # load model and data --------------------
     model_dir = join(base_dir, model_name)
@@ -98,9 +107,8 @@ def run():
     #
     print 'saving link weights'
     # # link weights --------------------
-    link_weights = get_link_weights(nn_model.model)
-    link_weights_df = get_link_weights_df(link_weights, feature_names)
-    save_link_weights(link_weights_df)
+    link_weights_df = get_link_weights_df_(nn_model.model, feature_names, layers)
+    save_link_weights(link_weights_df, layers[1:])
     #
     print 'saving activation'
     # # activation --------------------
@@ -109,24 +117,32 @@ def run():
     #
     print 'saving graph stats'
     # # graph stats --------------------
-    degrees, fan_ins, fan_outs = get_degrees(link_weights_df[1:])
-    save_graph_stats(degrees,fan_outs, fan_ins)
+    stats = get_degrees(link_weights_df, layers[1:])
+    import numpy as np
+    keys = np.sort(stats.keys())
+    for k in keys:
+        filename = join(saving_dir, 'graph_stats_{}.csv'.format(k))
+        stats[k].to_csv(filename)
+    # save_graph_stats(degrees,fan_outs, fan_ins)
     #
     print 'adjust weights with graph stats'
     # # graph stats --------------------
-    #
-    node_importance = adjust_coef_with_graph_degree(node_weights_[1:], degrees, saving_dir)
+    degrees=[]
+    for k in keys:
+        degrees.append(stats[k].degree.to_frame(name='coef_graph'))
+
+    node_importance = adjust_coef_with_graph_degree(node_weights_, stats,layers[1:-1], saving_dir)
     filename = join(saving_dir, 'node_importance_graph_adjusted.csv')
     node_importance.to_csv(filename)
 
     # # filter connection --------------------
 
-    high_nodes2 = get_high_nodes(node_importance, sigma=3)
-    connections_df = get_connections(link_weights_df[1:])
-
-    important_node_connections_df = filter_connections(connections_df, high_nodes2, add_unk=False)
-    filename = join(saving_dir, 'links_filtered.csv')
-    important_node_connections_df.to_csv(filename)
+    # high_nodes2 = get_high_nodes(node_importance, sigma=3)
+    # connections_df = get_connections(link_weights_df, layers[1:])
+    #
+    # important_node_connections_df = filter_connections(connections_df, high_nodes2, add_unk=False)
+    # filename = join(saving_dir, 'links_filtered.csv')
+    # important_node_connections_df.to_csv(filename)
 
 if __name__ == "__main__":
     run()

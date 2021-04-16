@@ -6,7 +6,7 @@ def get_reactome_pathway_names():
     :return: dataframe of pathway ids and names
     '''
     reactome_pathways_df = pd.read_csv(
-        join(REACTOM_PATHWAY_PATH, 'input/ReactomePathways.txt'), sep='	',
+        join(REACTOM_PATHWAY_PATH, 'ReactomePathways.txt'), sep='	',
         header=None)
     reactome_pathways_df.columns = ['id', 'name', 'species']
     reactome_pathways_df_human = reactome_pathways_df[reactome_pathways_df['species'] == 'Homo sapiens']

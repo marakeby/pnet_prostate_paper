@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from os.path import join
 from model.model_utils import get_coef_importance
+from config_path import REACTOM_PATHWAY_PATH
 
 
 def get_data(loader, use_data, dropAR):
@@ -46,9 +47,7 @@ def get_data(loader, use_data, dropAR):
 
 # returns a dataframe of pathway ids and names
 def get_reactome_pathway_names():
-    reactome_pathways_df = pd.read_csv(
-        '/Users/haithamelmarakeby/PycharmProjects/ml_pipeline/data/pathways/Reactome/input/ReactomePathways.txt', sep='	',
-        header=None)
+    reactome_pathways_df = pd.read_csv(join(REACTOM_PATHWAY_PATH,'ReactomePathways.txt'), sep='	',header=None)
     reactome_pathways_df.columns = ['id', 'name', 'species']
     reactome_pathways_df_human = reactome_pathways_df[reactome_pathways_df['species'] == 'Homo sapiens']
     reactome_pathways_df_human.reset_index(inplace=True)
@@ -99,18 +98,24 @@ def get_node_importance(nn_model, x_train, y_train, importance_type, target):
         # empty
         coef_detailed = [c.T for c in coef]
 
-    node_weights_dfs = []
-    node_weights_samples_dfs = []
-    layers = []
-    for i, (w, w_samples, name) in enumerate(zip(coef, coef_detailed, nn_model.feature_names)):
+    node_weights_dfs = {}
+    node_weights_samples_dfs = {}
+    # layers = []
+    # for i, (w, w_samples, name) in enumerate(zip(coef, coef_detailed, nn_model.feature_names)):
+    for i, k in enumerate(nn_model.feature_names.keys()):
+        name = nn_model.feature_names[k]
+        w = coef[k]
+        w_samples = coef_detailed[k]
         features = get_pathway_names(name)
         df = pd.DataFrame(abs(w.ravel()), index=name, columns=['coef'])
         layer = pd.DataFrame(index=name)
         layer['layer'] = i
-        node_weights_dfs.append(df)
-        layers.append(layer)
+        # node_weights_dfs.append(df)
+        node_weights_dfs[k] = df
+        # layers.append(layer)
         df_samples = pd.DataFrame(w_samples, columns=features)
-        node_weights_samples_dfs.append(df_samples)
+        # node_weights_samples_dfs.append(df_samples)
+        node_weights_samples_dfs[k] = (df_samples)
     return node_weights_dfs, node_weights_samples_dfs
 
 from model.layers_custom import SparseTF
@@ -128,6 +133,47 @@ def get_link_weights_df(link_weights, features):
 
     df = pd.DataFrame(link_weights[-1], index=features[-1], columns=['root'])
     link_weights_df.append(df)
+
+    return link_weights_df
+
+def get_layer_weights(layer):
+    w = layer.get_weights()[0]
+    if type(layer) == SparseTF:
+        row_ind = layer.nonzero_ind[:, 0]
+        col_ind = layer.nonzero_ind[:, 1]
+        w = csr_matrix((w, (row_ind, col_ind)), shape=layer.kernel_shape)
+        w = w.todense()
+    return w
+
+def get_link_weights_df_(model, features, layer_names):
+    #first layer
+    # layer_name= layer_names[1]
+    # layer= model.get_layer(layer_name)
+    link_weights_df = {}
+    # df = pd.DataFrame( layer.get_weights()[0], index=features[layer_names[0]])
+    # link_weights_df[layer_name]=df
+
+    for i, layer_name in enumerate(layer_names[1:]):
+        layer = model.get_layer(layer_name)
+        w= get_layer_weights(layer)
+        layer_ind = layer_names.index(layer_name)
+        previous_layer_name = layer_names[layer_ind-1]
+
+        print  i, previous_layer_name, layer_name
+        if i ==0 or i==(len(layer_names)-2):
+            cols=['root']
+        else:
+            cols = features[layer_name]
+        rows = features[previous_layer_name]
+        w_df = pd.DataFrame(w, index=rows, columns=cols)
+        link_weights_df[layer_name] = w_df
+
+    #last layer
+    # layer_name = layer_names[-1]
+    # layer = model.get_layer(layer_name)
+    # link_weights_df = {}
+    # df = pd.DataFrame(layer.get_weights()[0], index=features[layer_names[0]])
+    # link_weights_df[layer_name] = df
 
     return link_weights_df
 
@@ -171,37 +217,46 @@ def adjust_layer(df):
     return df
 
 
-def get_degrees(maps):
-    layers = []
-    fan_outs = []
-    fan_ins = []
-    degrees = []
-    for i, m in enumerate(maps):
-        layer = m
-        layer[layer != 0.] = 1.
-        fan_out = layer.abs().sum(axis=1)
+def get_degrees(maps, layers):
+    stats = {}
+    for i, (l1, l2) in enumerate(zip(layers[1:], layers[2:])):
+
+        layer1 = maps[l1]
+        layer2 = maps[l2]
+
+        layer1[layer1!=0] =1.
+        layer2[layer2 != 0] = 1.
+
+        fan_out1 = layer1.abs().sum(axis=1)
+        fan_in1 = layer1.abs().sum(axis=0)
+
+        fan_out2 = layer2.abs().sum(axis=1)
+        fan_in2 = layer2.abs().sum(axis=0)
+
         if i == 0:
-            degree = fan_out.copy()
-        else:
-            degree = fan_out.add(fan_ins[i - 1], fill_value=0)
-        fan_in = layer.abs().sum(axis=0)
-        fan_outs.append(fan_out)
-        fan_ins.append(fan_in)
-        degrees.append(degree)
-    #         layer = layer.unstack().reset_index(name='value')
-    #         layer = layer[layer.value != 0]
-    #         print layer.head()
-    #         layers.append(layer)
-    degrees = [pd.DataFrame(d, columns=['coef_graph']) for d in degrees]
-    fan_ins = [pd.DataFrame(d, columns=['coef_graph']) for d in fan_ins]
-    fan_outs = [pd.DataFrame(d, columns=['coef_graph']) for d in fan_outs]
-    return degrees, fan_ins, fan_outs
+            print i
+            l = layers[0]
+            df = pd.concat([fan_out1, fan_out1], keys=['degree', 'fanout'], axis=1)
+            df['fanin'] = 1.
+            stats[l] = df
 
+        print '{}- layer {} :fan-in {}, fan-out {}'.format(i, l1, fan_in1.shape, fan_out2.shape)
+        print '{}- layer {} :fan-in {}, fan-out {}'.format(i, l1, fan_in2.shape, fan_out1.shape)
 
-def adjust_coef_with_graph_degree(node_importance_dfs, degrees, saving_dir):
+        df = pd.concat([fan_in1, fan_out2], keys=['fanin', 'fanout'], axis=1)
+        df['degree'] = df['fanin'] + df['fanout']
+        stats[l1] = df
+
+    return stats
+
+def adjust_coef_with_graph_degree(node_importance_dfs, stats, layer_names, saving_dir):
     ret = []
-    for i, (grad, graph) in enumerate(zip(node_importance_dfs, degrees)):
-        print i
+    # for i, (grad, graph) in enumerate(zip(node_importance_dfs, degrees)):
+    for i, l in enumerate(layer_names):
+        print l
+        grad=node_importance_dfs[l]
+        graph=stats[l]['degree'].to_frame(name='coef_graph')
+
         graph.index = get_pathway_names(graph.index)
         grad.index = get_pathway_names(grad.index)
         d = grad.join(graph, how='inner')
@@ -217,7 +272,7 @@ def adjust_coef_with_graph_degree(node_importance_dfs, degrees, saving_dir):
         d['coef_combined_zscore']=z
         d = adjust_layer(d)
         #         d['coef_combined'] = d['coef_combined']/sum(d['coef_combined'])
-        filename = join(saving_dir, 'layer_{}_graph_adjusted.csv'.format(i+1))
+        filename = join(saving_dir, 'layer_{}_graph_adjusted.csv'.format(i))
         d.to_csv(filename)
         d['layer'] = i+1
         ret.append(d)
@@ -234,11 +289,12 @@ def get_nlargeest_ind(S, sigma=2.):
     ret = int(sum(ind_source))
     return ret
 
-def get_connections(maps):
+def get_connections(maps, layer_names):
     layers = []
-    for i, m in enumerate(maps):
-        layer = m
-        layer = layer.unstack().reset_index(name='value')
+    for i, l in enumerate(layer_names):
+        layer = maps[l]
+        # layer = layer.unstack().reset_index(name='value')
+        layer = layer.unstack().reset_index()
         layer = layer[layer.value != 0]
         layer['layer'] = i+1
         print layer.head()
