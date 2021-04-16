@@ -5,7 +5,6 @@ import os
 
 import numpy as np
 import pandas as pd
-# import theano
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, LearningRateScheduler
 from sklearn import metrics
