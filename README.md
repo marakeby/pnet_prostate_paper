@@ -133,7 +133,7 @@ To get a local copy up and running follow these simple steps.
    ```
 3. Based on your use, you may need to download one or more of the following 
 
-    a. [Data files](https://drive.google.com/uc?id=156fypNOfaLOfXUeJbcqF776rqHs6linh&export=download) (needed to retrain models). Extract the files under ```_database``` directory. If you like to store it somewhere else, you may need to set the ```DATA_PATH``` variable in ```config_path.py``` accordingly.
+    a. [Data files](https://drive.google.com/uc?id=156fypNOfaLOfXUeJbcqF776rqHs6linh&export=download) (needed to retrain models and generate figures). Extract the files under ```_database``` directory. If you like to store it somewhere else, you may need to set the ```DATA_PATH``` variable in ```config_path.py``` accordingly.
     
     b. [Log files](https://drive.google.com/uc?id=1KioP2VeCe95GN9QKZcHzU-mdeBidcclR&export=download) (needed to regenerate paper figures). Extract the files under ```_logs``` directory. If you like to store it somewhere else, you may need to set the ```LOG_PATH``` variable in ```config_path.py``` accordingly.
   
@@ -164,14 +164,15 @@ To get a local copy up and running follow these simple steps.
    cd ./analysis
    python figure_1_d_auc_prc.py
    ```
-   
-5. To re-train all models from scratch run (time consuming process) 
+    For ```Figure3``` , make sure you run ```prepare_data.py``` before running other files    
+5. To re-train a model from scratch run 
    ```sh
    cd ./train
    python run_me.py
    ```
-
-
+    This will run an experiment 'pnet/onsplit_average_reg_10_tanh_large_testing' which trains a P-NET model on a training-testing data split of Armenia et al data set and compare it to a simple logistic regression model. 
+    The results of the experiment will be stored under ```_logs```in a directory with the same name as the experiment.  
+    To run another experiment, you may uncomment one of the lines in the run_me.py to run the corresponding experiment. Note that some models especially cross validation experiments may be time consuming. 
 <!-- LICENSE -->
 ## License
 
