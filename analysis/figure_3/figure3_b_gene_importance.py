@@ -310,13 +310,11 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
         ax1.set_yticks(ax1.get_yticks(), [])
         ax1.spines['top'].set_visible(False)
         ax1.spines['right'].set_visible(False)
-        ax1.spines['bottom'].set_visible(False)
+        # ax1.spines['bottom'].set_visible(False)
+        ax1.set_xlabel('Total importance score',  labelpad=15, fontdict=dict(family='Arial',weight='bold', fontsize=12))
         ax1.spines['left'].set_visible(False)
-        ax1.tick_params(bottom='off', which='both')
+        # ax1.tick_params(bottom='off', which='both')
         ax1.tick_params(left='off', which='both')
-
-
-
 
 
         df2 = df2[df2.value!=0]
@@ -325,13 +323,14 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
 
 
         ax2.set_ylabel('')
-        ax2.set_xlabel('')
+        ax2.set_xlabel('Sample-level importance score', fontdict=dict(family='Arial',weight='bold', fontsize=12))
 
-        ax2.set_xticks([], [])
+        # ax2.set_xticks([], [])
+        ax2.set_xlim(0,1)
         ax2.set_yticks([], [])
         ax2.spines['top'].set_visible(False)
         ax2.spines['right'].set_visible(False)
-        ax2.spines['bottom'].set_visible(False)
+        # ax2.spines['bottom'].set_visible(False)
         ax2.spines['left'].set_visible(False)
 
         #
