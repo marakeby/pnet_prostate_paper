@@ -1,23 +1,17 @@
-from setup import saving_dir
-
-import pandas as pd
-from matplotlib import pyplot as plt, ticker
 from os.path import join
-import seaborn as sns
 
-from matplotlib import pyplot as plt, ticker
-from os.path import join, dirname
-
+import numpy as np
+import pandas as pd
+from lifelines import KaplanMeierFitter
+from lifelines.statistics import logrank_test
+from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
-import numpy as np
-from lifelines.statistics import logrank_test
-from lifelines import KaplanMeierFitter
 
 from config_path import DATA_PATH, LOG_PATH
+from setup import saving_dir
 
-# base_dir = dirname(dirname(dirname(__file__)))
 base_dir = DATA_PATH
 def plot_(primary):
     percent = 100*primary/sum(primary)
@@ -28,17 +22,14 @@ def plot_(primary):
     fig.set_size_inches(3, 5)
     ax=axes
     plt.bar(xpos,percent,  align='center', alpha=1.0, color=['black', 'red'], width=width)
-#     plt.xticks(xpos, labels)
     plt.ylim([0,100])
-    # for item in [fig, ax]:
-    #     item.patch.set_visible(False)
+
     ax.axis('off')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
 
     for i in ax.patches:
-        # get_x pulls left or right; get_height pushes up or down
         if i.get_height()>1.0:
             ax.text(i.get_x() + 0.3*i.get_width(), i.get_height() + 5.0, '{:5.1f}%'.format(i.get_height()), fontsize=15,
                     color='black', rotation=0)
