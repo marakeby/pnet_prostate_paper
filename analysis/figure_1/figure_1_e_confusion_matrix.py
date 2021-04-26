@@ -19,24 +19,24 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 # set default params
 from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
 
-custom_rcParams = {
-    'figure.figsize': (8, 3),
-    'font.family': 'Arial',
-    'font.size': 12,
-    'font.weight': 'regular',
-    'axes.labelsize': 12,
-    'axes.formatter.useoffset': False,
-    'axes.formatter.limits': (-4, 4),
-    'axes.titlesize': 12,
-    'legend.fontsize': 12,
-    'xtick.labelsize': 12,
-    'ytick.labelsize': 12,
-    'pdf.fonttype': 42
-}
+# custom_rcParams = {
+#     'figure.figsize': (8, 3),
+#     'font.family': 'Arial',
+#     'font.size': 12,
+#     'font.weight': 'regular',
+#     'axes.labelsize': 12,
+#     'axes.formatter.useoffset': False,
+#     'axes.formatter.limits': (-4, 4),
+#     'axes.titlesize': 12,
+#     'legend.fontsize': 12,
+#     'xtick.labelsize': 12,
+#     'ytick.labelsize': 12,
+#     'pdf.fonttype': 42
+# }
 
-mpl.rcParams.update(custom_rcParams)
-sns.set_context('paper', rc=custom_rcParams)
-sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": False, "grid.color":"0.9"})
+# mpl.rcParams.update(custom_rcParams)
+# sns.set_context('paper', rc=custom_rcParams)
+# sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": False, "grid.color":"0.9"})
 
 
 def plot_confusion_matrix(ax, cm, classes, labels=None,
@@ -157,6 +157,7 @@ def run_matrix():
     plot_confusion_matrix_all(ax)
     filename = join(saving_dir, 'confusion matrix.png')
     plt.savefig(filename, dpi=400)
+    plt.close()
 
 if __name__=='__main__':
     run_matrix()

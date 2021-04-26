@@ -18,24 +18,24 @@ import matplotlib as mpl
 # set default params
 from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
 
-custom_rcParams = {
-    'figure.figsize': (8, 3),
-    'font.family': 'Arial',
-    'font.size': 10,
-    'font.weight': 'regular',
-    'axes.labelsize': 10,
-    'axes.formatter.useoffset': False,
-    'axes.formatter.limits': (-4, 4),
-    'axes.titlesize': 10,
-    'legend.fontsize': 10,
-    'xtick.labelsize': 8,
-    'ytick.labelsize': 8,
-    'pdf.fonttype': 42
-}
+# custom_rcParams = {
+#     'figure.figsize': (8, 3),
+#     'font.family': 'Arial',
+#     'font.size': 10,
+#     'font.weight': 'regular',
+#     'axes.labelsize': 10,
+#     'axes.formatter.useoffset': False,
+#     'axes.formatter.limits': (-4, 4),
+#     'axes.titlesize': 10,
+#     'legend.fontsize': 10,
+#     'xtick.labelsize': 8,
+#     'ytick.labelsize': 8,
+#     'pdf.fonttype': 42
+# }
 
-mpl.rcParams.update(custom_rcParams)
-sns.set_context('paper', rc=custom_rcParams)
-sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": True, "grid.color":"0.9"})
+# mpl.rcParams.update(custom_rcParams)
+# sns.set_context('paper', rc=custom_rcParams)
+# sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": True, "grid.color":"0.9"})
 
 mapping_dict = {'accuracy':'Accuracy',       'auc':'Area Under Curve (AUC)'  ,
                 'aupr':'AUPRC', 'f1': 'F1', 'percision' :'Precision'  , 'recall':'Recall' }
@@ -73,8 +73,7 @@ def plot_prc(ax, y_test, y_pred_score, save_dir, color, label=''):
 
 
 all_models_dict = {}
-# base_dir = './../../run/logs/p1000/'
-# base_dir = join(PROSTATE_LOG_PATH, 'pnet')
+
 base_dir = PROSTATE_LOG_PATH
 models_base_dir = join(base_dir , 'compare/onsplit_ML_test')
 models = ['Linear Support Vector Machine ', 'RBF Support Vector Machine ', 'L2 Logistic Regression', 'Random Forest',
@@ -170,6 +169,7 @@ def run_prc():
     plt.gcf().subplots_adjust(bottom=0.15)
     filename= join(saving_dir, '_prc')
     plt.savefig( filename, dpi=400)
+    sns.set_style(None)
 
 
 def run_auc():
@@ -179,10 +179,11 @@ def run_auc():
     plt.legend(loc="lower right", fontsize=8, framealpha=0.0)
     filename= join(saving_dir, '_auc')
     plt.savefig(filename, dpi=400)
+    sns.set_style(None)
 
 if __name__=="__main__":
     run_prc()
     run_auc()
-    sns.set_style(None)
+
 
     

@@ -25,9 +25,9 @@ custom_rcParams = {
     'pdf.fonttype': 42
 }
 
-mpl.rcParams.update(custom_rcParams)
-sns.set_context('paper', rc=custom_rcParams)
-sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": True, "grid.color":"0.9"})
+# mpl.rcParams.update(custom_rcParams)
+# sns.set_context('paper', rc=custom_rcParams)
+# sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": True, "grid.color":"0.9"})
 
 
 
@@ -101,15 +101,14 @@ def run():
     print pnet_df.head()
 
     df = pd.concat([pnet_df, df], axis=1)
-    
-
-
-
 
     df = df.drop('dense_data_0', axis=1, level=0)
     df = df.drop('Logistic Regression_ALL', axis=1, level=0)
 
     plot_box_plot(df, saving_dir)
+    sns.set_style(None)
+    plt.close()
+    plt.close()
 
 if __name__ == "__main__":
     run()
