@@ -379,13 +379,14 @@ def run():
     if not exists(saving_directory):
         makedirs(saving_directory)
 
-
+    plt.close()
     fig = plt.figure(figsize=(8, 4), dpi=200)
     ax = fig.subplots(1, 1)
     #figure 3b
     plot_high_genes2(ax, layer=1, graph='boxplot_custom')
     filename = join(saving_directory, 'genes_high.png')
     plt.savefig(filename, dpi=200)
+    plt.close()
 
     # layers = []
     for l in layers:

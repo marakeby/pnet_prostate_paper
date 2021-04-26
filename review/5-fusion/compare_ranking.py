@@ -80,17 +80,17 @@ for l in layers:
     top10_nofusions = ranked['no-Fusion'].nsmallest(n).index
 
     c=len(set(top10_fusions).intersection(top10_nofusions))
-    common_list.append(c/float(n) )
+    common_list.append(100.*c/float(n) )
 
     c=len(set(top10_fusions_genes).intersection(top10_nofusions))
-    common_list_genes.append(c/float(n))
+    common_list_genes.append(100.*c/float(n))
 
 plt.plot(common_list, '-.')
 plt.plot(common_list_genes,'-.')
-plt.ylim(0,1)
-plt.ylabel('Percent of common nodes')
+plt.ylim(0,100)
+plt.ylabel('Percent of common nodes (%)')
 plt.xlabel('Layers')
-plt.legend(['Fusion', 'Fusion (genes'])
+plt.legend(['Fusion', 'Fusion (genes)'])
 plt.xticks(range(len(layers)), layers)
 
 current_dir= basename(dirname(__file__))

@@ -1,15 +1,12 @@
-import os
-import sys
+from os.path import dirname, realpath
 from setup import saving_dir
 from vis_utils import get_reactome_pathway_names
-from os.path import join, dirname, realpath, exists
 
 current_dir = dirname(realpath(__file__))
 module_path=current_dir
 import pandas as pd
 import numpy as np
 from os.path import join
-from plotly.offline import plot
 import matplotlib.pyplot as plt
 
 '''
@@ -38,7 +35,7 @@ def get_first_layer_df(nlargest):
 
     df = get_first_layer(node_weights, number_of_best_nodes=nlargest[0], col_name='coef', include_others=True)
     # print df.head()
-    df.to_csv(join(saving_dir,'first_layer.csv'))
+    # df.to_csv(join(saving_dir,'first_layer.csv'))
     first_layer_df = df[['source', 'target', 'value', 'layer']]
     return first_layer_df
 
@@ -262,7 +259,7 @@ def get_x_y(df_encoded, layers_nodes):
 
 
     print 'node_weights',node_weights
-    node_weights.to_csv('node_weights.csv')
+    # node_weights.to_csv('node_weights.csv')
     dd = node_weights.groupby('layer')['value'].transform(pd.Series.sum)
     node_weights['layer_weight'] = dd
     node_weights['y'] = node_weights.groupby('layer')['value'].transform(pd.Series.cumsum)
@@ -670,11 +667,11 @@ def run():
 
     df.value = df.value_final_corrected
 
-    df.to_csv('links_df.csv')
+    # df.to_csv('links_df.csv')
     important_node_connections_df = df.replace(id_to_name_dict)
 
-    important_node_connections_df.to_csv('important_node_connections_df.csv')
-    high_nodes_df.to_csv('high_nodes_df.csv')
+    # important_node_connections_df.to_csv('important_node_connections_df.csv')
+    # high_nodes_df.to_csv('high_nodes_df.csv')
 
     high_nodes_df=high_nodes_df[[col_name, 'layer']]
 
@@ -692,12 +689,13 @@ def run():
     linkes_filtred_, all_node_labels, pos, node_layers, node_colors_list =  get_fromated_network(links_df,high_nodes_df, col_name=col_name, remove_others=False)
     data_trace, layout = get_data_trace(linkes_filtred_, all_node_labels, pos, node_layers,  node_colors= node_colors_list)
     # #
-    linkes_filtred_.to_csv('links.csv')
+    # linkes_filtred_.to_csv('links.csv')
     fig = dict(data=[data_trace], layout=layout)
     #
     from plotly.offline import plot
     filename = join(saving_dir, 'sankey_full.html')
     plot(fig,  filename=filename)
+    plt.close()
 #
 
 if __name__ == "__main__":

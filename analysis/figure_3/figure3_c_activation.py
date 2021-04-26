@@ -182,6 +182,7 @@ def run():
         plt.subplots_adjust(left=shift)
         filename = join(saving_dir, 'layer_activation{}.png'.format(l))
         plt.savefig(filename, dpi=200)
+        plt.close()
 
 if __name__=="__main__":
     run()
