@@ -18,44 +18,18 @@ import matplotlib as mpl
 # set default params
 from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
 
-# custom_rcParams = {
-#     'figure.figsize': (8, 3),
-#     'font.family': 'Arial',
-#     'font.size': 10,
-#     'font.weight': 'regular',
-#     'axes.labelsize': 10,
-#     'axes.formatter.useoffset': False,
-#     'axes.formatter.limits': (-4, 4),
-#     'axes.titlesize': 10,
-#     'legend.fontsize': 10,
-#     'xtick.labelsize': 8,
-#     'ytick.labelsize': 8,
-#     'pdf.fonttype': 42
-# }
-
-# mpl.rcParams.update(custom_rcParams)
-# sns.set_context('paper', rc=custom_rcParams)
-# sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": True, "grid.color":"0.9"})
-
 mapping_dict = {'accuracy':'Accuracy',       'auc':'Area Under Curve (AUC)'  ,
                 'aupr':'AUPRC', 'f1': 'F1', 'percision' :'Precision'  , 'recall':'Recall' }
 
 def plot_roc(ax, y_test, y_pred_score, save_dir,color, label=''):
     fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_score, pos_label=1)
     roc_auc = metrics.auc(fpr, tpr)
-    # plt.figure(fig.number)
-#     plt.plot(fpr, tpr, label=label + ' (area = %0.2f)' % roc_auc, linewidth=2, color=color)
-#     plt.plot(fpr, tpr, label=label + ' (area = %0.2f)' % roc_auc, linewidth=2)
     ax.plot(fpr, tpr, label=label + ' (area = %0.2f)' % roc_auc, linewidth=2, color=color)
-    # plt.plot(fpr, tpr)
     ax.plot([0, 1], [0, 1], 'k--', alpha=0.1)
     ax.set_xlim([0.0, 1.0])
     ax.set_ylim([0.0, 1.05])
-
     ax.set_xlabel('False Positive Rate', fontproperties)
     ax.set_ylabel('True Positive Rate', fontproperties)
-    # ax.set_title('Receiver operating characteristic (ROC)', fontsize=18)
-
 
 def plot_prc(ax, y_test, y_pred_score, save_dir, color, label=''):
     # plt.figure(fig.number)
@@ -169,6 +143,7 @@ def run_prc():
     plt.gcf().subplots_adjust(bottom=0.15)
     filename= join(saving_dir, '_prc')
     plt.savefig( filename, dpi=400)
+    plt.savefig( filename+'.pdf',transparent=True)
     sns.set_style(None)
 
 
@@ -179,7 +154,10 @@ def run_auc():
     plt.legend(loc="lower right", fontsize=8, framealpha=0.0)
     filename= join(saving_dir, '_auc')
     plt.savefig(filename, dpi=400)
+    plt.savefig(filename + '.pdf',transparent=True)
     sns.set_style(None)
+
+
 
 if __name__=="__main__":
     run_prc()

@@ -1,6 +1,6 @@
 from os.path import dirname, realpath
 from setup import saving_dir
-from vis_utils import get_reactome_pathway_names
+from analysis.vis_utils import get_reactome_pathway_names
 
 current_dir = dirname(realpath(__file__))
 module_path=current_dir
@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from os.path import join
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 '''
 first layer
@@ -57,8 +58,9 @@ def encode_nodes(df):
     target = df['target']
     all_node_labels = list(np.unique(np.concatenate([source, target])))
     n_nodes = len(all_node_labels)
-    df_encoded = df.replace(all_node_labels, range(n_nodes))
-    return df_encoded, all_node_labels
+    node_code =  range(n_nodes)
+    df_encoded = df.replace(all_node_labels, node_code)
+    return df_encoded, all_node_labels, node_code
 
 
 def get_nlargeest_ind(S):
@@ -133,7 +135,7 @@ def get_links():
     return all_links_df
 
 
-def get_high_nodes(node_importance, nlargest, column ):
+def get_high_nodes(node_importance, nlargest, column):
     '''
     get n largest nodes in each layer
     :param:  node_importance: dataframe with coef_combined  and layer columns
@@ -249,13 +251,29 @@ def get_x_y(df_encoded, layers_nodes):
     n_layers = len(layers_nodes['layer'].unique())
 
     node_weights['x'] = (node_weights['layer']-2) *0.1 + 0.16
+    # node_weights['x'] = (node_weights['layer']-2) *0.15 + 0.16
     ind = node_weights.layer==0
     node_weights.loc[ind,'x' ] = 0.01
     ind = node_weights.layer==1
     node_weights.loc[ind,'x' ] = 0.08
     ind = node_weights.layer==2
-    node_weights.loc[ind,'x' ] = 0.16
+    node_weights.loc[ind, 'x'] = 0.14
 
+    xs = np.linspace(0.14,1,6, endpoint=False)
+    for i, x in enumerate(xs[1:]):
+        print i,x
+        ind = node_weights.layer == i+3
+        node_weights.loc[ind,'x' ] = x
+
+    # node_weights.loc[ind,'x' ] = 0.3
+    # ind = node_weights.layer==4
+    # node_weights.loc[ind,'x' ] = 0.4
+    # ind = node_weights.layer==5
+    # node_weights.loc[ind,'x' ] = 0.5
+    # ind = node_weights.layer==6
+    # node_weights.loc[ind,'x' ] = 0.6
+    # ind = node_weights.layer==7
+    # node_weights.loc[ind,'x' ] = 0.7
 
 
     print 'node_weights',node_weights
@@ -264,19 +282,23 @@ def get_x_y(df_encoded, layers_nodes):
     node_weights['layer_weight'] = dd
     node_weights['y'] = node_weights.groupby('layer')['value'].transform(pd.Series.cumsum)
     node_weights['y'] = (node_weights['y'] -  .5 * node_weights['value']) /(1.5*node_weights['layer_weight'])
+    # node_weights['y'] = (node_weights['y'] -  .5 * node_weights['value']) /(node_weights['layer_weight'])
 
-    ind = node_weights.layer==7
-    node_weights.loc[ind,'x' ] = 0.8
-    node_weights.loc[ind, 'y'] = 0.2
+    #root node
+    # ind = node_weights.layer==7
+    # node_weights.loc[ind,'x' ] = 0.67
+    node_weights.loc[ind, 'y'] = 0.33
 
 
     print 'node_weights', node_weights['x'], node_weights['y']
     node_weights.sort_index(inplace=True)
+    node_weights.to_csv('node_weights_original.csv')
     # node_weights.to_csv('xy.csv')
     return node_weights['x'], node_weights['y']
 
 
-def get_data_trace(linkes, all_node_labels, node_pos, layers, node_colors=None):
+# def get_data_trace(links, all_node_labels, node_pos, layers, node_colors=None):
+def get_data_trace(links, node_df, height, width, fontsize=6):
     '''
     linkes: dataframe [source, target, value]
     all_node_labels: list of real node names
@@ -285,60 +307,65 @@ def get_data_trace(linkes, all_node_labels, node_pos, layers, node_colors=None):
     node_colors, list of colors for each node (Same order as all_node_labels )
     '''
 
-    x = node_pos[0]
-    y = node_pos[1]
+    # df = pd.DataFrame(node_colors, index=all_node_labels,columns=['color'] )
+    # df.to_csv('all_node_labels.csv')
+
+    all_node_labels = node_df.short_name.values
+    node_colors = node_df.color.values
+    x = node_df.x.values
+    y = node_df.y.values
+
+    def rescale(val, in_min, in_max, out_min, out_max):
+        print val, in_min, in_max, out_min, out_max
+        if in_min == in_max:
+            return val
+        return out_min + (val - in_min) * ((out_max - out_min) / (in_max - in_min))
+
+    x = rescale(x, min(x), max(x), 0.01, .98)
+    # y = rescale(y, min(y), max(y), 0.01, .96)
+
     data_trace = dict(
         type='sankey',
+        arrangement='snap',
         domain=dict(
-            x=[0, 1],
-            y=[0, 1]
+            x=[0, 1.],
+            y=[0, 1.]
         ),
         orientation="h",
         valueformat=".0f",
         node=dict(
             pad=2,
-            thickness=30,
+            thickness=10,
             line=dict(
                 color="white",
-                width=2.
+                width=.5
             ),
             label=all_node_labels,
             x=x,
             y=y,
-            color=node_colors if node_colors else None,
+            color=node_colors,
+
         ),
         link=dict(
-            source=linkes['source'],
-            target=linkes['target'],
-            value=linkes['value'],
-            color=linkes['color']
-
+            source=links['source'],
+            target=links['target'],
+            value=links['value'],
+            color=links['color']
         )
     )
 
     layout = dict(
-        # title="Neural Network Architecture",
-        height=1000,
-        width=2000,
+        height=height,
+        width=width,
+        margin=go.layout.Margin(
+            l=0,  # left margin
+            r=0,  # right margin
+            b=0.1,  # bottom margin
+            t=8,  # top margin
+        ),
         font=dict(
-            size=13, family='Arial',
+            size=fontsize, family='Arial',
         )
-        # updatemenus=[dict(
-        #     y=0.6,
-        #     buttons=[
-        #         dict(
-        #             label='Horizontal',
-        #             method='restyle',
-        #             args=['orientation', 'h']
-        #         ),
-        #         dict(
-        #             label='Vertical',
-        #             method='restyle',
-        #             args=['orientation', 'v']
-        #         )
-        #     ]
-
-        # )]
     )
     return data_trace, layout
 
@@ -489,11 +516,14 @@ def get_fromated_network(links, high_nodes_df, col_name, remove_others):
     for key, value in node_colors_dict.items():
         node_colors_dict[key] = 'rgba{}'.format(tuple(value))
 
+    # remove links with no values
+    links = links.dropna(subset=['value'], axis=0)
+
     # enocde nodes (convert node names into numbers)
-    linkes_filtred_encoded_df, all_node_labels = encode_nodes(links)
+    linkes_filtred_encoded_df, all_node_labels,  node_code = encode_nodes(links)
 
     # get node per layers
-    node_layers = high_nodes_df[['layer']]
+    node_layers_df = high_nodes_df[['layer']]
 
     # remove self connection
     ind = linkes_filtred_encoded_df.source == linkes_filtred_encoded_df.target
@@ -502,27 +532,71 @@ def get_fromated_network(links, high_nodes_df, col_name, remove_others):
     # make sure we positive values for all edges
     linkes_filtred_encoded_df.value = linkes_filtred_encoded_df.value.abs()
 
-    x, y = get_x_y(links, node_layers)
+    # linkes_filtred_encoded_df = linkes_filtred_encoded_df.fillna(0.001)
+
+
+
+    # linkes_filtred_encoded_df = linkes_filtred_encoded_df[~linkes_filtred_encoded_df['value'].isna()]
+
+    x, y = get_x_y(links, node_layers_df)
 
     # shorten names
-    all_node_labels_short = []
-    for n in all_node_labels:
-        to_be_added = str(n)
-        if len(to_be_added) >30:
-            to_be_added = to_be_added[:20] + ' ...'
-        if 'others' in to_be_added :
-            to_be_added ='residual'
-        if 'root' in to_be_added :
-            to_be_added ='outcome'
-        # to_be_added = to_be_added +'_' + str(round(x[n],2)) + '_' + str(round(y[n],2))
-        all_node_labels_short.append(to_be_added)
+
+    def get_short_names(all_node_labels):
+        '/Users/haithamelmarakeby/PycharmProjects/pnet2/analysis/figure_3/extracted/pathways_short_names.xlsx'
+        df = pd.read_excel(join(module_path, './extracted/pathways_short_names.xlsx'), index_col=0)
+        mapping_dict = {}
+        for k, v in zip(df['Full name'].values, df['Short name (Eli)'].values):
+            mapping_dict[k] = str(v)
+
+        all_node_labels_short=[]
+        for l in all_node_labels:
+            short_name = l
+            if l in mapping_dict.keys() and not mapping_dict[l] == 'nan':
+                short_name = mapping_dict[l]
+
+            if 'others' in short_name:
+                short_name ='residual'
+            if 'root' in short_name :
+                short_name ='outcome'
+
+            all_node_labels_short.append( short_name)
+
+        # all_node_labels_short = []
+        # for n in all_node_labels:
+        #     to_be_added = str(n)
+        #     if len(to_be_added) >=30:
+        #         to_be_added = to_be_added[:25] + ' ...'
+        #     if 'others' in to_be_added :
+        #         to_be_added ='residual'
+        #     if 'root' in to_be_added :
+        #         to_be_added ='outcome'
+        #         # to_be_added ='root'
+        #     # to_be_added = '{}({},{})'.format(to_be_added,str(round(x[n],2)),str(round(y[n],2)) )
+        #     all_node_labels_short.append(to_be_added)
+        return all_node_labels_short
+
+    # node_colors_list = []
+    # for l in all_node_labels:
+    #     node_colors_list.append(node_colors_dict[l])
+    # xy_pos = (x, y)
+    # node_colors_df = pd.DataFrame(node_colors_dict)
 
     node_colors_list = []
     for l in all_node_labels:
         node_colors_list.append(node_colors_dict[l])
 
-    pos = (x, y)
-    return linkes_filtred_encoded_df, all_node_labels_short, pos, node_layers, node_colors_list
+    all_node_labels_short = get_short_names(all_node_labels)
+
+    data  = np.column_stack((node_code, node_colors_list, all_node_labels_short))
+    nodes_df = pd.DataFrame(data, columns = ['code', 'color', 'short_name'], index=all_node_labels)
+    nodes_df = nodes_df.join(x, how='left')
+    nodes_df = nodes_df.join(y, how='left')
+
+    print nodes_df.head()
+    print nodes_df.shape
+    # return linkes_filtred_encoded_df, all_node_labels_short, xy_pos, node_layers_df, node_colors_list
+    return linkes_filtred_encoded_df, nodes_df
 
 
 # #remove self connections
@@ -643,30 +717,33 @@ def run():
     node_importance_normalized.columns = ['source_importance']
     links_df_ = pd.merge(links_df_, node_importance_normalized, left_on='source', right_index=True, how='left')
     #
-    df = links_df_.copy()
-    df['A'] = df.value_normalized_by_source * df.source_importance
-    df['B'] = df.value_normalized_by_target * df.target_importance
-    df['value_final']  = df[["A", "B"]].min(axis=1)
-    #
-    df['value_old']  = df.value
-    df.value  = df.value_final
-    #
-    df['source_fan_out'] = df.groupby('source').value_final.transform(np.sum)
-    df['source_fan_out_error'] = np.abs(df.source_fan_out - 100.*df.source_importance)
+    def adjust_values(links_df_in):
+        df = links_df_in.copy()
+        df['A'] = df.value_normalized_by_source * df.source_importance
+        df['B'] = df.value_normalized_by_target * df.target_importance
+        df['value_final'] = df[["A", "B"]].min(axis=1)
+        #
+        df['value_old'] = df.value
+        df.value = df.value_final
+        #
+        df['source_fan_out'] = df.groupby('source').value_final.transform(np.sum)
+        df['source_fan_out_error'] = np.abs(df.source_fan_out - 100. * df.source_importance)
 
-    df['target_fan_in'] = df.groupby('target').value_final.transform(np.sum)
-    df['target_fan_in_error'] = np.abs(df.target_fan_in - 100.*df.target_importance)
-    #
-    #
-    ind  = df.source.str.contains('others')
-    df['value_final_corrected']  = df.value_final
-    df.loc[ind, 'value_final_corrected'] = df[ind].value_final + df[ind].target_fan_in_error
-    ind  = df.target.str.contains('others')
+        df['target_fan_in'] = df.groupby('target').value_final.transform(np.sum)
+        df['target_fan_in_error'] = np.abs(df.target_fan_in - 100. * df.target_importance)
+        #
+        #
+        ind = df.source.str.contains('others')
+        df['value_final_corrected'] = df.value_final
+        df.loc[ind, 'value_final_corrected'] = df[ind].value_final + df[ind].target_fan_in_error
+        ind = df.target.str.contains('others')
 
-    df.loc[ind, 'value_final_corrected'] = df[ind].value_final_corrected + df[ind].source_fan_out_error
+        df.loc[ind, 'value_final_corrected'] = df[ind].value_final_corrected + df[ind].source_fan_out_error
 
-    df.value = df.value_final_corrected
+        df.value = df.value_final_corrected
+        return df
 
+    df = adjust_values(links_df_)
     # df.to_csv('links_df.csv')
     important_node_connections_df = df.replace(id_to_name_dict)
 
@@ -679,23 +756,76 @@ def run():
     high_nodes_df.loc['mutation'] = [1, 0]
     high_nodes_df.loc['amplification'] = [1, 0]
     high_nodes_df.loc['deletion'] = [1, 0]
-    high_nodes_df.loc['other1'] = [1, 1]
+    # high_nodes_df.loc['other1'] = [1, 1]
+    # high_nodes_df.loc['hidden'] = [1, 8]
 
     # add first layer
     first_layer_df = get_first_layer_df(nlargest)
-    links_df  = pd.concat([first_layer_df, important_node_connections_df]).reset_index()
+    links_df = pd.concat([first_layer_df, important_node_connections_df], sort=True).reset_index()
 
 
-    linkes_filtred_, all_node_labels, pos, node_layers, node_colors_list =  get_fromated_network(links_df,high_nodes_df, col_name=col_name, remove_others=False)
-    data_trace, layout = get_data_trace(linkes_filtred_, all_node_labels, pos, node_layers,  node_colors= node_colors_list)
-    # #
-    # linkes_filtred_.to_csv('links.csv')
-    fig = dict(data=[data_trace], layout=layout)
+    # df2 = {'source': 'root', 'target': 'hidden', 'value': 200}
+    # links_df = links_df.append(df2, ignore_index=True)
+
+    # links_df = links_df[links_df['layer'] ==6]
+    # linkes_filtred_, all_node_labels, pos, node_layers, node_colors_list =  get_fromated_network(links_df,high_nodes_df, col_name=col_name, remove_others=False)
+    linkes_filtred_, nodes_df =  get_fromated_network(links_df,high_nodes_df, col_name=col_name, remove_others=False)
+
+    # all_node_labels.append('hidden')
+    # data_trace, layout = get_data_trace(linkes_filtred_, all_node_labels, pos, node_layers,  node_colors= node_colors_list)
+    # data_trace, layout = get_data_trace(linkes_filtred_, nodes_df, height, width)
+
+    # linkes_filtred_.to_csv('links_encoded.csv')
+    # links_df.to_csv('links_df.csv')
+    # node_layers.to_csv('node_layers.csv')
     #
+    # x = pos[0]
+    # y = pos[1]
+    # x.to_frame().to_csv('x.csv')
+    # y.to_frame().to_csv('y.csv')
+
+    # df = pd.concat([node_layers, x.to_frame(), y.to_frame()], axis=1)
+    # df.to_csv('nodes.csv')
+    # print type(x), type(y)
+    # fig = dict(data=[data_trace], layout=layout)
+    # #
+    # from plotly.offline import plot
+    # filename = join(saving_dir, 'sankey_full.html')
+    # plot(fig,  filename=filename)
+
+
+    # fig = go.Figure(fig)
+    # filename = join(saving_dir, 'sankey_full.png')
+    # fig.write_image(filename)
+    # filename = join(saving_dir, 'sankey_full.pdf')
+    # fig.write_image(filename)
+    # plt.close()
+
+    scale = 1.
+    width = 600. / scale
+    height = 0.5 * width / scale
+    # linkes_filtred_.to_csv('linkes_filtred.csv')
+    # nodes_df.to_csv('nodes_df.csv')
+    data_trace, layout = get_data_trace(linkes_filtred_, nodes_df, height, width)
+    fig = dict(data=[data_trace], layout=layout)
+    fig = go.Figure(fig)
+    filename = join(saving_dir, 'sankey_print.pdf')
+    fig.write_image(filename, scale=1, width=width, height=height, format='pdf')
+
+    filename = join(saving_dir, 'sankey_print.png')
+    fig.write_image(filename, scale=5, width=width, height=height, format='png')
+
     from plotly.offline import plot
-    filename = join(saving_dir, 'sankey_full.html')
-    plot(fig,  filename=filename)
-    plt.close()
+    scale = 0.5
+    width = 600. / scale
+    height = 0.5 * width
+    data_trace, layout = get_data_trace(linkes_filtred_, nodes_df, height, width, fontsize=12)
+    fig = dict(data=[data_trace], layout=layout)
+    filename = 'sankey.html'
+    filename = join(saving_dir, filename)
+    plot(fig, filename=filename)
+
+
 #
 
 if __name__ == "__main__":

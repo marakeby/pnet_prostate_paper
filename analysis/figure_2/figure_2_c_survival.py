@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
-
 from config_path import DATA_PATH, LOG_PATH
 from setup import saving_dir
 
@@ -33,7 +32,6 @@ def plot_(primary):
         if i.get_height()>1.0:
             ax.text(i.get_x() + 0.3*i.get_width(), i.get_height() + 5.0, '{:5.1f}%'.format(i.get_height()), fontsize=15,
                     color='black', rotation=0)
-
 
 
 def get_predictions(filename, correct_prediction = True):

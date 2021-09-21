@@ -1,6 +1,5 @@
 import sys
 from os.path import join, dirname, realpath, exists
-from os import makedirs
 current_dir = dirname(dirname(realpath(__file__)))
 sys.path.insert(0, dirname(current_dir))
 
@@ -8,36 +7,13 @@ import pandas as pd
 from matplotlib import pyplot as plt, ticker
 from os.path import join
 import numpy as np
-from sklearn import metrics
-from sklearn.metrics import average_precision_score
-import seaborn as sns
-import matplotlib as mpl
+
 import itertools
 from sklearn.metrics import confusion_matrix
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # set default params
 from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
-
-# custom_rcParams = {
-#     'figure.figsize': (8, 3),
-#     'font.family': 'Arial',
-#     'font.size': 12,
-#     'font.weight': 'regular',
-#     'axes.labelsize': 12,
-#     'axes.formatter.useoffset': False,
-#     'axes.formatter.limits': (-4, 4),
-#     'axes.titlesize': 12,
-#     'legend.fontsize': 12,
-#     'xtick.labelsize': 12,
-#     'ytick.labelsize': 12,
-#     'pdf.fonttype': 42
-# }
-
-# mpl.rcParams.update(custom_rcParams)
-# sns.set_context('paper', rc=custom_rcParams)
-# sns.set_style("white", {"grid.linestyle": u'--', "axes.grid": False, "grid.color":"0.9"})
-
 
 def plot_confusion_matrix(ax, cm, classes, labels=None,
                           normalize=False,
@@ -67,9 +43,6 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
     cb = fig.colorbar(im, cax=cax, orientation='vertical')
     cb.outline.set_visible(False)
     tick_marks = np.arange(len(classes))
-    # ax.set_xticks(tick_marks, classes, rotation=45)
-    # ax.set_xticks(tick_marks, classes)
-    # ax.set_yticks(tick_marks, classes)
 
 
     if labels is None:

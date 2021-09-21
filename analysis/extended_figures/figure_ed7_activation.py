@@ -1,12 +1,15 @@
-from setup import saving_dir
+from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.stats import pearsonr
 from os.path import join, dirname, realpath, exists
-from analysis.data_extraction_utils import get_pathway_names
+# from analysis.figure_3.data_extraction_utils import get_pathway_names
 import pandas as pd
 import matplotlib.pyplot as plt
 from os.path import join
 import seaborn as sns
+
+from config_path import PLOTS_PATH
+from analysis.data_extraction_utils import get_pathway_names
 
 def plot_high_genes_violinplot(df_in,ax, y, name, saving_dir):
     y =y.reindex(df_in.index)
@@ -57,50 +60,22 @@ def plot_high_genes_pairplot(df_in, y, name, saving_dir):
 
 
 def corrfunc(x, y, **kws):
-    #     print kws
     if kws['label'] == '1-Metastatic':
         r, _ = pearsonr(x, y)
         ax = plt.gca()
         ax.annotate("r = {:.2f}".format(r),
                     xy=(.1, 1.05), xycoords=ax.transAxes)
 
-# if __name__=="__main__":
-#     node_activation = pd.read_csv('./extracted/node_importance_graph_adjusted.csv', index_col=0)
-#     response = pd.read_csv('./extracted/response.csv', index_col=0)
-#     print node_activation.head()
-#     print response.head()
-#     # i=0
-#     for l in range(1, 7):
-#         df = pd.read_csv('./extracted/activation_{}.csv'.format(l), index_col=0)
-#         df.columns = get_pathway_names(df.columns)
-#         print 'layer {} {}'.format(l, df.shape)
-#         high_nodes = node_activation[node_activation.layer == l].abs().nlargest(10, columns=['coef_combined'])
-#         high_nodes = high_nodes.sort_values('coef_combined', ascending=False)
-#         features = list(high_nodes.index)
-#         print features
-#         to_be_saved =  df[features].copy()
-#         plot_high_genes_violinplot(to_be_saved, response, name='l{}'.format(l), saving_dir='./visualizations/activation')
-#         to_be_saved =  to_be_saved[features[0:6]]
-#         plot_high_genes_pairplot(to_be_saved, response, name='l{}'.format(l), saving_dir='./visualizations/activation')
 current_dir = dirname(realpath(__file__))
 
-def plot_activation(ax, l, column='coef_combined', layer=3, pad=200):
-    # divider = make_axes_locatable(ax)
-    # ax2 = divider.append_axes('left', size='100%', pad=0.6)
-    # ax2.spines['top'].set_visible(False)
-    # ax2.spines['right'].set_visible(False)
-    # ax2.spines['left'].set_visible(False)
-    # ax2.spines['bottom'].set_visible(False)
-    # ax2.set_yticks([])
-    # ax2.set_xticks([])
+def plot_activation(ax, column='coef_combined', layer=3, pad=200):
 
-    node_activation = pd.read_csv(join(current_dir,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
-    response = pd.read_csv(join(current_dir,'extracted/response.csv'), index_col=0)
-    df = pd.read_csv(join(current_dir,'extracted/activation_{}.csv'.format(layer)), index_col=0)
+    node_activation = pd.read_csv(join(module_path,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    response = pd.read_csv(join(module_path,'extracted/response.csv'), index_col=0)
+    df = pd.read_csv(join(module_path,'extracted/activation_{}.csv'.format(layer)), index_col=0)
     df.columns = get_pathway_names(df.columns)
     if layer==1:
         column='coef_combined'
-    # high_nodes = node_activation[node_activation.layer == layer].abs().nlargest(10, columns=[column])
     high_nodes = node_activation[node_activation.layer == layer].abs().nlargest(10, columns=[column])
     high_nodes = high_nodes.sort_values(column, ascending=False)
     features = list(high_nodes.index)
@@ -126,66 +101,69 @@ def plot_activation(ax, l, column='coef_combined', layer=3, pad=200):
     palette = dict(Primary=current_palette[0], Metastatic=current_palette[1])
     sns.violinplot(y="variable", x="value", hue="group", data=df2, split=True, bw=.3, inner=None, palette=palette,
                         linewidth=.5, ax=ax)
-    # ax.set_aspect(1)
     ax.autoscale(enable=True, axis='x', tight=True)
-
     ax.get_legend().remove()
     ax.set_xlim((-1.2,1.2))
-    # ax.legend
-    # ax.legend(['Primary', 'Metastatic'], fontsize=8, bbox_to_anchor=(1.0, 1.3))
-    # ax.tick_params(axis='y',labelsize=12)
-    fontProperties = {'family': 'Arial','weight': 'normal', 'size': 10}
-    ax.set_yticklabels(ax.get_yticklabels(), fontProperties)
-
-    # ax.set_ylabel('', labelpad=30)
-    ax.set_ylabel('')
-    ax.set_xlabel('Activation', fontdict=dict(family='Arial',weight='bold', fontsize=14))
+    ax.set_yticklabels(ax.get_yticklabels(), fontproperties)
+    # ax.set_xticklabels(ax.get_xticklabels(), fontproperties)
+    # ax.set_ylabel('')
+    if layer==6:
+        ax.set_xlabel('Activation', fontproperties)
+    else:
+        ax.set_xlabel('')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_visible(False)
 
-
     for tick in ax.yaxis.get_major_ticks():
         tick.tick1line.set_markersize(0)
         tick.tick2line.set_markersize(0)
         tick.label1.set_horizontalalignment('left')
-
     ax.tick_params(axis="y", direction="out", pad=pad)
     ax.yaxis.set_ticks_position('none')
+    ax.tick_params(axis='x', labelsize=fontsize)
+    ax.set_ylabel('Layer H{}'.format(layer), fontproperties, labelpad=20)
 
-    ax.set_ylabel('Layer {}'.format(l), fontdict=dict(family='Arial',weight='bold', fontsize=14))
 
 
+saving_dir = join(PLOTS_PATH, 'extended_data')
+module_path = dirname(dirname(realpath(__file__)))
 
-    # plt.tight_layout()
-    # ax.subplots_adjust(left=0.35)
-    # plot_high_genes_violinplot(to_be_saved, ax, response, name='l{}'.format(layer), saving_dir='./output/activation')
-    # to_be_saved = to_be_saved[features[0:6]]
-    # plot_high_genes_pairplot(to_be_saved, response, name='l{}'.format(l), saving_dir='./visualizations/activation')
+def shorten_names(name):
+    if len(name)>=60:
+        name= name[:60]+' ...'
+    return name
+
+fontsize = 5 # legends, axis
+fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
+
+def plot_axis(axis):
+    pad=[150]*6
+    for l in range(1,7):
+        ax = axis[l-1]
+        plot_activation(ax,  column='coef', layer=l, pad=pad[l-1] )
+
 
 def run():
-    left_adjust=[0.1, 0.]
-    pad=[50, 250, 200, 250, 200, 200]
-    # fig = plt.figure(figsize=(8, 4))
-    # fig = plt.figure(figsize=(8, 4 *7))
-    for l in range(1,7):
-        fig = plt.figure(figsize=(9, 4))
-        # ax = plt.subplot(6, 1,l)
-        ax = fig.subplots(1,1)
-        plot_activation(ax, l, column='coef', layer=l, pad=pad[l-1] )
-        # plt.subplots_adjust(left=0.5)
-        if l==1:
-            shift=0.3
-        else:
-            shift=0.6
-        plt.subplots_adjust(left=shift)
-        filename = join(saving_dir, 'layer_activation{}.png'.format(l))
-        plt.savefig(filename, dpi=200)
-        plt.close()
+    fig = plt.figure(constrained_layout=False, figsize=(7.2, 9.72))
+    spec2 = gridspec.GridSpec(ncols=1, nrows=6, figure=fig)
+    ax1 = fig.add_subplot(spec2[0, 0])
+    ax2 = fig.add_subplot(spec2[1, 0])
+    ax3 = fig.add_subplot(spec2[2, 0])
+    ax4 = fig.add_subplot(spec2[3, 0])
+    ax5 = fig.add_subplot(spec2[4, 0])
+    ax6 = fig.add_subplot(spec2[5, 0])
 
-if __name__=="__main__":
-    run()
+    plot_axis([ax1, ax2, ax3, ax4, ax5, ax6])
+    fig.tight_layout()
+
+    plt.gcf().subplots_adjust(left=0.5, right=0.8, bottom= 0.15)
+    filename = join(saving_dir, 'figure_ed7_activation.png')
+    plt.savefig(filename, dpi=300)
+
+if __name__ == "__main__":
+        run()
     # plt.savefig('./output/layer_activation{}.png'.format('all'), dpi=200)
 #
 
