@@ -12,9 +12,7 @@ from skimage.util import view_as_windows
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import nn_grad, math_grad
 
-SUPPORTED_ACTIVATIONS = [
-    'Relu', 'Elu', 'Sigmoid', 'Tanh', 'Softplus'
-]
+SUPPORTED_ACTIVATIONS = ['Relu', 'Elu', 'Sigmoid', 'Tanh', 'Softplus']
 
 UNSUPPORTED_ACTIVATIONS = [
     'CRelu', 'Relu6', 'Softsign'

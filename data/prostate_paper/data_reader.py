@@ -21,6 +21,7 @@ gene_truncating_mutations_only = 'P1000_final_analysis_set_cross_truncating_only
 # gene_expression = 'P1000_data_tpm.csv'
 gene_expression = 'P1000_adjusted_TPM.csv'
 fusions_filename = 'p1000_onco_ets_fusions.csv'
+cnv_burden_filename = 'P1000_data_CNA_burden.csv'
 fusions_genes_filename = 'fusion_genes.csv'
 
 cached_data = {}
@@ -73,6 +74,18 @@ def load_data(filename, selected_genes=None):
 
 
 def load_TMB(filename=gene_final_no_silent_no_intron):
+    x, response, samples, genes = load_data(filename)
+    x = np.sum(x, axis=1)
+    x = np.array(x)
+    x = np.log(1. + x)
+    n = x.shape[0]
+    response = response.values.reshape((n, 1))
+    samples = np.array(samples)
+    cols = np.array(['TMB'])
+    return x, response, samples, cols
+
+
+def load_CNV_burden(filename=gene_final_no_silent_no_intron):
     x, response, samples, genes = load_data(filename)
     x = np.sum(x, axis=1)
     x = np.array(x)
@@ -180,6 +193,9 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
 
     if data_type == 'fusions':
         x, response, info, genes = load_data(fusions_filename, None)
+
+    if data_type == 'cnv_burden':
+        x, response, info, genes = load_data(cnv_burden_filename, None)
         # x.loc[:, :] = 0.
 
     if data_type == 'fusion_genes':

@@ -89,8 +89,11 @@ params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
 # params_file_list.append('./review/onsplit_average_reg_10_cancer_genes_testing')
 # params_file_list.append('./review/crossvalidation_average_reg_10_tanh_cancer_genes')
 
-
-
+#review 2 (second iteration of reviews)
+# params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_TMB2')
+# params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_account_zero2')
+# params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_TMB_cnv')
+# params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_cnv_burden2')
 
 for params_file in params_file_list:
     log_dir = join(PROSTATE_LOG_PATH, params_file)

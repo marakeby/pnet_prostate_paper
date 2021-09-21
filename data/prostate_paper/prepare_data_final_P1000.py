@@ -2,14 +2,15 @@
 from os.path import join, dirname
 import pandas as pd
 
+from config_path import PROSTATE_DATA_PATH, PLOTS_PATH
 
-current_dir = dirname(__file__)
+# current_dir = dirname(__file__)
 
 processed_dir = 'processed'
 data_dir = 'raw_data'
 
-processed_dir = join(current_dir, processed_dir)
-data_dir = join(current_dir, data_dir)
+processed_dir = join(PROSTATE_DATA_PATH, processed_dir)
+data_dir = join(PROSTATE_DATA_PATH, data_dir)
 
 
 def prepare_design_matrix_crosstable():
@@ -69,6 +70,13 @@ def prepare_cnv():
     filename = join(processed_dir, 'P1000_data_CNA_paper.csv')
     df.to_csv(filename)
 
+def prepare_cnv_burden():
+    print('preparing copy number burden ...')
+    filename = '41588_2018_78_MOESM5_ESM.xlsx'
+    df = pd.read_excel(join(data_dir, filename), skiprows=2, index_col=1)
+    cnv = df['Fraction of genome altered']
+    filename = join(processed_dir, 'P1000_data_CNA_burden.csv')
+    cnv.to_frame().to_csv(filename)
 
 # remove silent and intron mutations
 filter_silent_muts = False
@@ -97,4 +105,5 @@ if filter_introns_muts:
 prepare_design_matrix_crosstable()
 prepare_cnv()
 prepare_response()
+prepare_cnv_burden()
 print('Done')
