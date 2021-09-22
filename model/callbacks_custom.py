@@ -1,6 +1,5 @@
 import logging
 import warnings
-
 import numpy as np
 import pandas as pd
 from keras.callbacks import Callback

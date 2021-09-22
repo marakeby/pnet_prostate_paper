@@ -10,11 +10,8 @@ import scipy.sparse
 import yaml
 from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix
-
 from data.data_access import Data
 from model.model_factory import get_model
-# from features_processing import feature_extraction
-# from features_processing.feature_scaler import FeatureScaler
 from pipeline.pipe_utils import get_model_id, get_coef_from_model, get_balanced
 from preprocessing import pre
 from utils.evaluate import evalualte_survival, evalualte_classification_binary, evalualte_regression
@@ -44,7 +41,6 @@ def get_model_name(model):
 class OneSplitPipeline:
     def __init__(self, task, data_params, pre_params, feature_params, model_params, pipeline_params, exp_name):
 
-        # self.eval_dataset = eval_dataset
         self.task = task
         if type(data_params) == list:
             self.data_params = data_params
@@ -67,7 +63,6 @@ class OneSplitPipeline:
         self.prapre_saving_dir()
 
     def prapre_saving_dir(self):
-        # self.directory = self.exp_name +  timeStamp
         self.directory = self.exp_name
         if not exists(self.directory):
             makedirs(self.directory)
@@ -106,12 +101,7 @@ class OneSplitPipeline:
         return genes_list
 
     def get_train_test(self, data):
-        # x_train, x_test, y_train, y_test= data.get_train_test()
         x_train, x_test, y_train, y_test, info_train, info_test, columns = data.get_train_test()
-        # info_train= x_train.index
-        # info_test= x_test.index
-        # columns=x_train.columns
-        # balance data
         balance_train = False
         balance_test = False
         p = self.pipeline_params['params']
@@ -142,7 +132,6 @@ class OneSplitPipeline:
             logging.info('loading data....')
             data = Data(**data_params)
             # get data
-            # x_train, x_test, y_train, y_test, info_train, info_test, cols = self.get_train_test(data)
             x_train, x_validate_, x_test_, y_train, y_validate_, y_test_, info_train, info_validate_, info_test_, cols = data.get_train_validate_test()
 
             logging.info('predicting')
@@ -151,21 +140,9 @@ class OneSplitPipeline:
                 y_t = y_validate_
                 info_t = info_validate_
             else:
-                # print type(x_train)
-                # print type(y_train)
-                # print type(info_train)
-                #
-                # x_train = np.concatenate((x_train , x_validate_))
-                # y_train = np.concatenate((y_train , y_validate_))
-                # info_train = info_train.append(info_validate_)
-
                 x_t = np.concatenate((x_test_, x_validate_))
                 y_t = np.concatenate((y_test_, y_validate_))
                 info_t = info_test_.append(info_validate_)
-
-                # x_t = x_test_
-                # y_t = y_test_
-                # info_t = info_test_
 
             logging.info('x_train {} y_train {} '.format(x_train.shape, y_train.shape))
             logging.info('x_test {} y_test {} '.format(x_t.shape, y_t.shape))
@@ -180,19 +157,15 @@ class OneSplitPipeline:
                 model = get_model(model_params_)
                 logging.info('fitting')
                 logging.info(model_params_)
-                # model = model.fit(x_train, y_train)
                 if model_params_['type'] == 'nn' and not self.eval_dataset == 'validation':
                     model = model.fit(x_train, y_train, x_validate_, y_validate_)
-                    # model = model.fit(x_train, y_train, x_train, y_train)
                 else:
                     model = model.fit(x_train, y_train)
-                # # model_list.append(model)
                 logging.info('predicting')
 
                 model_name = get_model_name(model_params_)
                 model_name = model_name + '_' + data_id
                 model_params_['id'] = model_name
-
                 logging.info('model id: {}'.format(model_name))
                 model_list.append((model, model_params_))
                 y_pred_test, y_pred_test_scores = self.predict(model, x_test, y_t)
@@ -201,7 +174,6 @@ class OneSplitPipeline:
                 test_scores.append(test_score)
                 model_names.append(model_name)
                 logging.info('saving results')
-                # self.save_score(test_score, model_name)
                 self.save_score(data_params, model_params_, test_score, model_name)
                 self.save_prediction(info_t, y_pred_test, y_pred_test_scores, y_t, model_name)
                 y_test_list.append(y_t)
@@ -228,14 +200,9 @@ class OneSplitPipeline:
                     self.save_prediction(info_train, y_pred_train, y_pred_train_scores, y_train, model_name,
                                          training=True)
 
-        # self.save_coef(model_list, cols)
-        # auc_fig.savefig(join(self.directory, 'auc_curves'))
-        # prc_fig.savefig(join(self.directory, 'auprc_curves'))
         test_scores = pd.DataFrame(test_scores, index=model_names)
         generate_plots(test_scores, self.directory)
         self.save_all_scores(test_scores)
-        # self.plot_coef(model_list)
-        # self.save_cnf_matrix(cnf_matrix_list, model_names)
 
         if self.task == 'classification_binary':
             auc_fig = plt.figure()
@@ -246,8 +213,6 @@ class OneSplitPipeline:
                                                                            y_pred_test_scores_list, model_names):
                 plot_roc(auc_fig, y_test, y_pred_test_scores, self.directory, label=model_name)
                 plot_prc(prc_fig, y_test, y_pred_test_scores, self.directory, label=model_name)
-                # cnf_matrix = confusion_matrix(y_test, y_pred_test)
-                # save_confusion_matrix(cnf_matrix, self.directory, model_name)
             auc_fig.savefig(join(self.directory, 'auc_curves'))
             prc_fig.savefig(join(self.directory, 'auprc_curves'))
         return test_scores
@@ -269,13 +234,11 @@ class OneSplitPipeline:
             makedirs(dir_name)
 
         for model, model_params in model_list:
-            # print model_params
             model_name = get_model_id(model_params)
             c_ = get_coef_from_model(model)
             logging.info('saving coef ')
             model_name_col = model_name
             if hasattr(model, 'get_named_coef') and c_ is not None:
-                # print 'save_feature_importance'
                 file_name = join(dir_name, 'coef_' + model_name)
                 coef = model.get_named_coef()
                 if type(coef) == list:
@@ -294,10 +257,6 @@ class OneSplitPipeline:
         file_name = join(dir_name, 'coef.csv')
         coef_df.to_csv(file_name)
 
-        # Plot normalized confusion matrix
-        # plt.figure()
-        # plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
-        #                       title='Normalized confusion matrix')
 
     def plot_coef(self, model_list):
         for model, model_name in model_list:
@@ -305,7 +264,6 @@ class OneSplitPipeline:
             file_name = join(self.directory, 'coef_' + model_name)
             for coef in model.coef_:
                 plt.hist(coef, bins=20)
-            # plt.hist(model.coef_[1], bins=20)
             plt.savefig(file_name)
 
     def save_all_scores(self, scores):
@@ -327,30 +285,17 @@ class OneSplitPipeline:
 
         with open(file_name, 'w') as yaml_file:
             yaml_file.write(
-                # yaml.dump([self.data_params, self.model_params, self.pre_params, str(score)], default_flow_style=False))
                 yaml.dump(yml_dict, default_flow_style=False)
             )
 
-        # with open(file_name, 'w') as yaml_file:
-        #     yaml_file.write(
-        #         yaml.dump([self.data_params, self.model_params, self.pre_params, str(score)], default_flow_style=False))
-
     def predict(self, model, x_test, y_test):
         logging.info('predicitng ...')
-        # if hasattr(model, 'transform'):
-        #     y_pred_test = model.transform(x_test)
-        # else:
-        #     pass
         y_pred_test = model.predict(x_test)
         if hasattr(model, 'predict_proba'):
             y_pred_test_scores = model.predict_proba(x_test)[:, 1]
         else:
             y_pred_test_scores = y_pred_test
 
-        # y_pred_test_scores =  model.predict_proba(x_test)[:,1]
-        # logging.info('scoring ...')
-        # score = evalualte(y_test, y_pred_test, y_pred_test_scores)
-        # cnf_matrix = confusion_matrix(y_test, y_pred_test)
         print 'y_pred_test', y_pred_test.shape, y_pred_test_scores.shape
         return y_pred_test, y_pred_test_scores
 
@@ -374,7 +319,6 @@ class OneSplitPipeline:
 
         proc = feature_extraction.get_processor(self.features_params)
         if proc:
-            # proc.fit(x_train)
             x_train = proc.transform(x_train)
             x_test = proc.transform(x_test)
 

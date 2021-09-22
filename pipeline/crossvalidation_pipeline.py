@@ -11,7 +11,6 @@ import yaml
 from sklearn.model_selection import StratifiedKFold
 
 from data.data_access import Data
-# from features_processing.feature_scaler import FeatureScaler
 from model.model_factory import get_model
 from pipeline.one_split import OneSplitPipeline
 from utils.plots import plot_box_plot
@@ -61,7 +60,6 @@ class CrossvalidationPipeline(OneSplitPipeline):
             logging.info('fitting model ...')
 
             for model_param in self.model_params:
-                # model_name = m['type']
                 if 'id' in model_param:
                     model_name = model_param['id']
                 else:
@@ -77,7 +75,6 @@ class CrossvalidationPipeline(OneSplitPipeline):
                 scores_df, scores_mean, scores_std = get_mean_variance(scores)
                 list_model_scores.append(scores_df)
                 model_names.append(model_name)
-                # self.save_score(scores_df, scores_mean, scores_std, model_param['type'])
                 self.save_score(data_params, m_param, scores_df, scores_mean, scores_std, model_name)
                 logging.info('scores')
                 logging.info(scores_df)
@@ -113,27 +110,14 @@ class CrossvalidationPipeline(OneSplitPipeline):
         for train_index, test_index in skf.split(X, y.ravel()):
             model = get_model(model_params)
             logging.info('fold # ----------------%d---------' % i)
-            # x_train, x_test = X.iloc[train_index], X.iloc[test_index]
             x_train, x_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
             info_train = pd.DataFrame(index=info[train_index])
             info_test = pd.DataFrame(index=info[test_index])
-            # info_test = info.iloc[test_index,:].copy()
             x_train, x_test = self.preprocess(x_train, x_test)
             # feature extraction
             logging.info('feature extraction....')
             x_train, x_test = self.extract_features(x_train, x_test)
-
-            # hack  TODO: change this
-            # scaler = FeatureScaler()
-            # x_train = scaler.transform(x_train, cols)
-            # x_test = scaler.transform(x_test, cols)
-
-            # if 'fitting_params' in model_params['params']:
-            #     if 'x_to_list' in model_params['params']['fitting_params']:
-            #         if model_params['params']['fitting_params']['x_to_list']:
-            #             x_train = self.get_list(x_train, cols)
-            #             x_test = self.get_list(x_test, cols)
 
             model = model.fit(x_train, y_train)
 
@@ -142,15 +126,12 @@ class CrossvalidationPipeline(OneSplitPipeline):
             logging.info('model {} -- Test score {}'.format(model_name, score_test))
             self.save_prediction(info_test, y_pred_test, y_pred_test_scores, y_test, i, model_name)
 
-            # logging.info('saving results')
-            # self.save_score(score_test, score_test, score_test, model_name )
             if hasattr(model, 'save_model'):
                 logging.info('saving coef')
                 save_model(model, model_name + '_' + str(i), self.directory)
 
             if self.save_train:
                 logging.info('predicting training ...')
-                # y_pred_train, y_pred_train_scores, score_train, confusion_mtrx = self.predict(model, x_train, y_train)
                 y_pred_train, y_pred_train_scores = self.predict(model, x_train, y_train)
                 self.save_prediction(info_train, y_pred_train, y_pred_train_scores, y_train, i, model_name,
                                      training=True)
@@ -178,5 +159,3 @@ class CrossvalidationPipeline(OneSplitPipeline):
                            'pipeline': self.pipeline_params, 'scores': scores.to_json(),
                            'scores_mean': scores_mean.to_json(), 'scores_std': scores_std.to_json()},
                           default_flow_style=False))
-    #
-    #

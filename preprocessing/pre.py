@@ -3,7 +3,6 @@ import numpy as np
 import copy
 from sklearn import preprocessing as p
 
-__author__ = 'marakeby'
 
 def get_processor(args):
     print args
@@ -40,8 +39,6 @@ def get_processor(args):
 def remove_outliers(y):
     m = np.mean(y)
     s = np.std(y)
-
-
     y2 = copy.deepcopy(y)
     s = np.std(y)
     n = 4
