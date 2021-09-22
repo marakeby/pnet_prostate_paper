@@ -105,7 +105,7 @@ SOFTWARE.
 
 <p align="center">
   <a href="https://github.com/marakeby/pnet_prostate_paper">
-    <img src="_plots/screenshot.png" alt="Logo" width="900" height="400">
+    <img src="_plots/screenshot.png" alt="Logo" width="900" height="300">
   </a>
   </p>
 
@@ -116,7 +116,7 @@ Biologically informed deep neural network for prostate cancer classification and
 
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+To get a local copy up and running, follow these simple steps
 
 ### Prerequisites
 
@@ -134,15 +134,15 @@ To get a local copy up and running follow these simple steps.
    ```
 3. Based on your use, you may need to download one or more of the following
 
-   a. [Data files](https://drive.google.com/uc?id=1yejDBzGlxuQVPFcFBvZC4KQcPw59xaq3&export=download) (needed to retrain
+   a. [Data files](https://drive.google.com/uc?id=17nssbdUylkyQY1ebtxsIw5UzTAd0zxWb&export=download) (needed to retrain
    models and generate figures). Extract the files under ```_database``` directory. If you like to store it somewhere
    else, you may need to set the ```DATA_PATH``` variable in ```config_path.py``` accordingly.
 
-   b. [Log files](https://drive.google.com/uc?id=1n1HDb4ZVXeedlhC-9lIBikMDzWHmImZi&export=download) (needed to
+   b. [Log files](https://drive.google.com/uc?id=18dJ5fWvJyISROkLRCUMfhsrwZ_iNXSNP&export=download) (needed to
    regenerate paper figures). Extract the files under ```_logs``` directory. If you like to store it somewhere else, you
    may need to set the ```LOG_PATH``` variable in ```config_path.py``` accordingly.
 
-   c. [Plots files](https://drive.google.com/uc?id=1cMsMXgD6I3BZ1fc3CHM7CpSGxHBsqK7X&export=download) (a copy of the
+   c. [Plots files](https://drive.google.com/uc?id=1DiZB8qvZqVXs9HyDCF7bCFOr_T1ER7Ku&export=download) (a copy of the
    paper images). Extract the files under ```_plots``` directory. If you like to store it somewhere else, you may need
    to set the ```PLOTS_PATH``` variable in ```config_path.py``` accordingly.
 
@@ -203,7 +203,7 @@ Project Link: [https://github.com/marakeby/pnet_prostate_paper](https://github.c
 <!-- References -->
 
 ## References
-
+* Elmarakeby H, et al. "Biologically informed deep neural network for prostate cancer classification and discovery." Nature. Online September 22, 2021. DOI: 10.1038/s41586-021-03922-4
 * Armenia, Joshua, et al. "The long tail of oncogenic drivers in prostate cancer." Nature genetics 50.5 (2018): 645-651.
 * Robinson, Dan R., et al. "Integrative clinical genomics of metastatic cancer." Nature 548.7667 (2017): 297-303.
 * Fraser, Michael, et al. "Genomic hallmarks of localized, non-indolent prostate cancer." Nature 541.7637 (2017):
@@ -212,10 +212,8 @@ Project Link: [https://github.com/marakeby/pnet_prostate_paper](https://github.c
 <!-- ACKNOWLEDGEMENTS -->
 
 ## Acknowledgements
+This work was supported in part by the Fund for Innovation in Cancer Informatics, Mark Foundation, Prostate Cancer Foundation, Movember, and the National Cancer Institute at the National Institutes of Health.
 
-* []()
-* []()
-* []()
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
