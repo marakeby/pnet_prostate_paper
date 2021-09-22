@@ -7,7 +7,7 @@ selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes.csv'
 data_base = {'id': 'ALL', 'type': 'prostate_paper',
              'params': {
                  'data_type': ['mut_important', 'cnv_del', 'cnv_amp'],
-                 'account_for_data_type' : None,
+                 'account_for_data_type': None,
                  'drop_AR': False,
                  'cnv_levels': 3,
                  'mut_binary': True,

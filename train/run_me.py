@@ -2,23 +2,20 @@ import sys
 from os.path import join, dirname, realpath
 current_dir = dirname(realpath(__file__))
 sys.path.insert(0, dirname(current_dir))
-
+import os
+import imp
+import logging
+import random
+import timeit
 import datetime
+import numpy as np
+import tensorflow as tf
 from utils.logs import set_logging, DebugFolder
 from config_path import PROSTATE_LOG_PATH, POSTATE_PARAMS_PATH
 from pipeline.train_validate import TrainValidatePipeline
 from pipeline.one_split import OneSplitPipeline
 from pipeline.crossvalidation_pipeline import CrossvalidationPipeline
 from pipeline.LeaveOneOut_pipeline import LeaveOneOutPipeline
-
-
-import os
-import imp
-import logging
-import random
-import timeit
-import numpy as np
-import tensorflow as tf
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -27,7 +24,6 @@ random.seed(random_seed)
 np.random.seed(random_seed)
 tf.random.set_random_seed(random_seed)
 
-
 timeStamp = '_{0:%b}-{0:%d}_{0:%H}-{0:%M}'.format(datetime.datetime.now())
 
 def elapsed_time(start_time, end_time):
@@ -35,7 +31,7 @@ def elapsed_time(start_time, end_time):
     elapsed_mins = int(elapsed_time / 60)
     elapsed_secs = int(elapsed_time - (elapsed_mins * 60))
     return elapsed_mins, elapsed_secs
-    
+
 params_file_list = []
 
 # pnet
@@ -80,16 +76,16 @@ params_file_list.append('./pnet/onsplit_average_reg_10_tanh_large_testing')
 # #learning rate
 # params_file_list.append('./review/learning_rate/onsplit_average_reg_10_tanh_large_testing_inner_LR')
 
-#hotspot
+# hotspot
 # params_file_list.append('./review/9hotspot/onsplit_average_reg_10_tanh_large_testing_hotspot')
 # params_file_list.append('./review/9hotspot/onsplit_average_reg_10_tanh_large_testing_count')
 
-#cancer genes
+# cancer genes
 # params_file_list.append('./review/onsplit_average_reg_10_tanh_large_testing')
 # params_file_list.append('./review/onsplit_average_reg_10_cancer_genes_testing')
 # params_file_list.append('./review/crossvalidation_average_reg_10_tanh_cancer_genes')
 
-#review 2 (second iteration of reviews)
+# review 2 (second iteration of reviews)
 # params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_TMB2')
 # params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_account_zero2')
 # params_file_list.append('./review/cnv_burden_training/onsplit_average_reg_10_tanh_large_testing_TMB_cnv')
@@ -108,7 +104,8 @@ for params_file in params_file_list:
     DebugFolder(log_dir)
     if params.pipeline['type'] == 'one_split':
         pipeline = OneSplitPipeline(task=params.task, data_params=params.data, model_params=params.models,
-                                    pre_params=params.pre, feature_params=params.features, pipeline_params=params.pipeline,
+                                    pre_params=params.pre, feature_params=params.features,
+                                    pipeline_params=params.pipeline,
                                     exp_name=log_dir)
 
     elif params.pipeline['type'] == 'crossvalidation':
@@ -116,15 +113,16 @@ for params_file in params_file_list:
                                            model_params=params.models, pre_params=params.pre,
                                            pipeline_params=params.pipeline, exp_name=log_dir)
     elif params.pipeline['type'] == 'Train_Validate':
-        pipeline = TrainValidatePipeline(data_params=params.data,  model_params=params.models, pre_params=params.pre,
-                                         feature_params=params.features, pipeline_params=params.pipeline, exp_name=log_dir)
+        pipeline = TrainValidatePipeline(data_params=params.data, model_params=params.models, pre_params=params.pre,
+                                         feature_params=params.features, pipeline_params=params.pipeline,
+                                         exp_name=log_dir)
 
     elif params.pipeline['type'] == 'LOOCV':
         pipeline = LeaveOneOutPipeline(task=params.task, data_params=params.data, feature_params=params.features,
-                                           model_params=params.models, pre_params=params.pre,
-                                           pipeline_params=params.pipeline, exp_name=log_dir)
+                                       model_params=params.models, pre_params=params.pre,
+                                       pipeline_params=params.pipeline, exp_name=log_dir)
     start = timeit.default_timer()
     pipeline.run()
     stop = timeit.default_timer()
     mins, secs = elapsed_time(start, stop)
-    logging.info('Elapsed Time: {}m {}s'.format(mins,secs))
+    logging.info('Elapsed Time: {}m {}s'.format(mins, secs))

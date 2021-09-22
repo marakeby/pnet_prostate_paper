@@ -1,9 +1,10 @@
-from functools import partialmethod
 import itertools
 import logging
 import random
-import pandas as pd
+from functools import partialmethod
+
 import numpy as np
+import pandas as pd
 
 __author__ = 'michael.p.schroeder@gmail.com'
 
@@ -45,7 +46,7 @@ class MutExResult(object):
 
 
 class MutEx(object):
-    def __init__(self, background: pd.DataFrame, permutations: int=100):
+    def __init__(self, background: pd.DataFrame, permutations: int = 100):
         """
         :param background: A data frame containing all the observations as binary data 1 and 0 or True and False where
                 rows represent observations and columns represent samples.

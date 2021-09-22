@@ -1,10 +1,11 @@
 import sys
-from os.path import join, dirname, realpath, exists
+from os.path import dirname, realpath
+
 current_dir = dirname(dirname(realpath(__file__)))
 sys.path.insert(0, dirname(current_dir))
 
 import pandas as pd
-from matplotlib import pyplot as plt, ticker
+from matplotlib import pyplot as plt
 from os.path import join
 import numpy as np
 
@@ -14,6 +15,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # set default params
 from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
+
 
 def plot_confusion_matrix(ax, cm, classes, labels=None,
                           normalize=False,
@@ -44,7 +46,6 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
     cb.outline.set_visible(False)
     tick_marks = np.arange(len(classes))
 
-
     if labels is None:
         fmt = '{:.2f}%' if normalize else '{:d}'
     else:
@@ -55,13 +56,13 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
         #         text= format(labels[i,j], cm[i, j], fmt)
         text = fmt.format(labels[i, j], cm[i, j])
         ax.text(j, i, text,
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black", fontsize=12)
+                horizontalalignment="center",
+                color="white" if cm[i, j] > thresh else "black", fontsize=12)
 
     # ax.tight_layout()
     fontproperties = {'family': 'Arial', 'weight': 'bold', 'size': 14}
 
-    ax.set_ylabel('True label',  fontproperties )
+    ax.set_ylabel('True label', fontproperties)
     # ax.set_ylabel('True label', fontsize=12, fontweight = 'bold', fontproperties )
     ax.set_xlabel('Predicted label', fontproperties)
     # plt.gcf().subplots_adjust(bottom=0.25, left=0.2)
@@ -93,8 +94,6 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
     # ax.set_yticks([], minor=True)
 
 
-
-
 #                     cmap = plt.cm.Greys)
 
 def plot_confusion_matrix_all(ax):
@@ -124,14 +123,15 @@ def plot_confusion_matrix_all(ax):
                           # cmap=plt.cm.Blues)
                           cmap=plt.cm.Reds)
 
+
 def run_matrix():
     saving_dir = join(PLOTS_PATH, 'figure1')
-    fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(5,4), dpi=400)
+    fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(5, 4), dpi=400)
     plot_confusion_matrix_all(ax)
     filename = join(saving_dir, 'confusion matrix.png')
     plt.savefig(filename, dpi=400)
     plt.close()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run_matrix()
-    

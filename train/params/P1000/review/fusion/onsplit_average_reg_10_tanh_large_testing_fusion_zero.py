@@ -2,15 +2,12 @@ from model.builders.prostate_models import build_pnet2
 
 task = 'classification_binary'
 selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes.csv'
-# selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes_and_memebr_of_reactome.csv'
 selected_samples = 'samples_with_fusion_data.csv'
 
 data_base = {'id': 'ALL', 'type': 'prostate_paper',
              'params': {
                  'data_type': ['mut_important', 'cnv_del', 'cnv_amp'],
-                 # 'data_type': ['gene_expression'],
-                 # 'account_for_data_type' : ['fusions'],
-                 'account_for_data_type' : None,
+                 'account_for_data_type': None,
                  'drop_AR': False,
                  'cnv_levels': 3,
                  'mut_binary': True,
@@ -27,7 +24,6 @@ data = [data_base]
 n_hidden_layers = 5
 base_dropout = 0.5
 wregs = [0.001] * 7
-# loss_weights = [2, 7, 20, 54, 148, 400]
 loss_weights = 1
 wreg_outcomes = [0.01] * 6
 pre = {'type': None}

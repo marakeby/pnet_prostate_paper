@@ -1,6 +1,7 @@
-from model.builders.prostate_models import build_pnet_KEGG
-from config_path import PATHWAY_PATH
 from os.path import join
+
+from config_path import PATHWAY_PATH
+from model.builders.prostate_models import build_pnet_KEGG
 
 task = 'classification_binary'
 selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes.csv'
@@ -18,8 +19,6 @@ data_base = {'id': 'ALL', 'type': 'prostate_paper',
              }
              }
 data = [data_base]
-
-
 
 pre = {'type': None}
 
@@ -49,7 +48,7 @@ nn_pathway = {
                                       debug=False,
                                       save_gradient=False,
                                       class_weight='auto',
-                                      n_outputs= 3,
+                                      n_outputs=3,
                                       prediction_output='average',
                                       early_stop=False,
                                       reduce_lr=False,

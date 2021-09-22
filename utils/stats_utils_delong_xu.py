@@ -1,6 +1,6 @@
-import pandas as pd
 import numpy as np
 import scipy.stats
+
 '''
 MIT License
 
@@ -24,6 +24,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+
+
 # AUC comparison adapted from
 # https://github.com/Netflix/vmaf/
 def compute_midrank(x):
@@ -42,7 +44,7 @@ def compute_midrank(x):
         j = i
         while j < N and Z[j] == Z[i]:
             j += 1
-        T[i:j] = 0.5*(i + j - 1)
+        T[i:j] = 0.5 * (i + j - 1)
         i = j
     T2 = np.empty(N, dtype=np.float)
     # Note(kazeevn) +1 is due to Python using 0-based indexing

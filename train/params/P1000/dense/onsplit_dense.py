@@ -32,7 +32,7 @@ nn_pathway = {
             'build_fn': build_pnet2,
             'model_params': {
                 'use_bias': True,
-                'sparse':False,
+                'sparse': False,
                 'sparse_first_layer': True,
                 'w_reg': wregs,
                 'w_reg_outcomes': wreg_outcomes,

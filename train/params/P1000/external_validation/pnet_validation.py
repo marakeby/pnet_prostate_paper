@@ -71,4 +71,4 @@ nn_pathway = {
 features = {}
 models = [nn_pathway]
 
-pipeline = {'type':  'Train_Validate', 'params': { 'save_train' : True}}
+pipeline = {'type': 'Train_Validate', 'params': {'save_train': True}}

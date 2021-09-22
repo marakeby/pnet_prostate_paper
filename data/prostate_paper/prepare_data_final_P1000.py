@@ -1,10 +1,6 @@
-
-from os.path import join, dirname
 import pandas as pd
-
-from config_path import PROSTATE_DATA_PATH, PLOTS_PATH
-
-# current_dir = dirname(__file__)
+from os.path import join
+from config_path import PROSTATE_DATA_PATH
 
 processed_dir = 'processed'
 data_dir = 'raw_data'
@@ -36,7 +32,6 @@ def prepare_design_matrix_crosstable():
     if truncating_only:
         include = ['Nonsense_Mutation', 'Frame_Shift_Del', 'Frame_Shift_Ins']
         df = df[df['Variant_Classification'].isin(include)].copy()
-    # print df['Variant_Classification'].value_counts()
     df_table = pd.pivot_table(data=df, index=id_col, columns='Hugo_Symbol', values='Variant_Classification',
                               aggfunc='count')
     df_table = df_table.fillna(0)
@@ -70,6 +65,7 @@ def prepare_cnv():
     filename = join(processed_dir, 'P1000_data_CNA_paper.csv')
     df.to_csv(filename)
 
+
 def prepare_cnv_burden():
     print('preparing copy number burden ...')
     filename = '41588_2018_78_MOESM5_ESM.xlsx'
@@ -77,6 +73,7 @@ def prepare_cnv_burden():
     cnv = df['Fraction of genome altered']
     filename = join(processed_dir, 'P1000_data_CNA_burden.csv')
     cnv.to_frame().to_csv(filename)
+
 
 # remove silent and intron mutations
 filter_silent_muts = False
@@ -100,7 +97,6 @@ if filter_missense_muts:
 
 if filter_introns_muts:
     ext = ext + "_no_introns"
-
 
 prepare_design_matrix_crosstable()
 prepare_cnv()

@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from data.gmt_reader import GMT
 
-
 def get_KEGG_map(input_list, filename='c2.cp.kegg.v6.1.symbols.gmt', genes_col=1, shuffle_genes=False):
     '''
     :param input_list: list of inputs under consideration (e.g. genes)
@@ -14,7 +13,7 @@ def get_KEGG_map(input_list, filename='c2.cp.kegg.v6.1.symbols.gmt', genes_col=1
     :return: dataframe with rows =genes and columns = pathways values = 1 or 0 based on the membership of certain gene in the corresponding pathway
     '''
     d = GMT()
-    df = d.load_data( filename, genes_col)
+    df = d.load_data(filename, genes_col)
     df['value'] = 1
     mapp = pd.pivot_table(df, values='value', index='gene', columns='group', aggfunc=np.sum)
     mapp = mapp.fillna(0)

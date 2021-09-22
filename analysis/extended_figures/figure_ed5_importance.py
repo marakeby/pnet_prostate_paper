@@ -1,37 +1,35 @@
-
-import pandas as pd
 import os
-import matplotlib.pyplot as plt
-from os.path import join
-import seaborn as sns
-import numpy as np
-from os.path import join, dirname, realpath, exists
 from os import makedirs
+from os.path import join, dirname, realpath, exists
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
 from config_path import PLOTS_PATH
 
 module_path = dirname(dirname(realpath(__file__)))
 
+
 def plot_high_genes_sns(df, col='avg_score', name='', saving_directory='.'):
-    df.index=df.index.map(shorten_names)
+    df.index = df.index.map(shorten_names)
     x_pos = range(df.shape[0])
     ax = sns.barplot(y=df.index, x=col, data=df,
                      palette="Blues_d")
     ax.set_ylabel('')
     ax.set_xlabel('')
     ax.set_title('Layer{}'.format(name))
-    ax.set_xticks([],[])
-    ax.set_yticks(ax.get_yticks(),[])
+    ax.set_xticks([], [])
+    ax.set_yticks(ax.get_yticks(), [])
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_visible(False)
-
 
 
 def plot_high_genes(df, col='avg_score', name='', saving_directory='.'):
@@ -123,7 +121,7 @@ def plot_high_genes_swarm(df_in, features, y, name, saving_directory):
     df2['group'] = df2['group'].replace(0, 'Primary')
     df2['group'] = df2['group'].replace(1, 'Metastatic')
     print df2.head()
-    df2.value= df2.value.abs()
+    df2.value = df2.value.abs()
     fig, ax = plt.subplots(figsize=(10, 7))
     # df2['color'] =  'rgba(31, 119, 180, 0.7)'
     # df2['color'] =  (0.12, 0.46, 0.7, 0.7)
@@ -136,7 +134,8 @@ def plot_high_genes_swarm(df_in, features, y, name, saving_directory):
     #          "#B47CC7", "#C4AD66", "#77BEDB"],
     current_palette = sns.color_palette()
     # ax = sns.swarmplot(x="variable", y="value", data=df2, hue="group", palette=dict(Primary = 'b', Metastatic = 'orange'))
-    ax = sns.swarmplot(x="variable", y="value", data=df2, hue="group", palette=dict(Primary = current_palette[0], Metastatic = current_palette[1]))
+    ax = sns.swarmplot(x="variable", y="value", data=df2, hue="group",
+                       palette=dict(Primary=current_palette[0], Metastatic=current_palette[1]))
     # ax.legend(['Primary', 'Metastatic'], loc='upper right', fontsize=12)
 
     plt.setp(ax.get_legend().get_texts(), fontsize='14')  # for legend text
@@ -198,7 +197,6 @@ def plot_jitter(group_col, val_col, data, ax):
         ax.plot(x, y, '.', markersize=5)
 
 
-
 def boxplot_csutom(group_col, val_col, data, ax):
     vals = data.groupby(group_col)[val_col]
     # quartile1 = vals.quantile(0.25)
@@ -240,35 +238,36 @@ def boxplot_csutom(group_col, val_col, data, ax):
     # ax.set_yticklabels(medians.index)
 
 
-def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
-
-    if layer==1:
+def plot_high_genes2(ax, layer=1, graph='hist', direction='h'):
+    if layer == 1:
         column = 'coef_combined'
     else:
         column = 'coef'
 
-    node_importance = pd.read_csv(join(module_path,'./figure_3/extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    node_importance = pd.read_csv(join(module_path, './figure_3/extracted/node_importance_graph_adjusted.csv'),
+                                  index_col=0)
     high_nodes = node_importance[node_importance.layer == layer].abs().nlargest(10, columns=[column])
     # high_nodes = node_importance[node_importance.layer == layer].abs().nlargest(10, columns=['coef'])
     features = list(high_nodes.index)
-    response = pd.read_csv(join(module_path,'./figure_3/extracted/response.csv'), index_col=0)
-    df_in = pd.read_csv(join(module_path, './figure_3/extracted/gradient_importance_detailed_{}.csv').format(layer), index_col=0)
+    response = pd.read_csv(join(module_path, './figure_3/extracted/response.csv'), index_col=0)
+    df_in = pd.read_csv(join(module_path, './figure_3/extracted/gradient_importance_detailed_{}.csv').format(layer),
+                        index_col=0)
     df_in = df_in.copy()
     df_in = df_in.join(response)
     df_in['group'] = df_in.response
     df2 = pd.melt(df_in, id_vars='group', value_vars=list(features), value_name='value')
 
-    if graph=='hist':
+    if graph == 'hist':
         df2 = pd.melt(df_in, id_vars='group', value_vars=list(features), value_name='value')
         bins = np.linspace(df2.value.min(), df2.value.max(), 20)
         g = sns.FacetGrid(df2, col="variable", hue="group", col_wrap=2)
         g.map(plt.hist, 'value', bins=bins, ec="k")
         g.axes[-1].legend(['primary', 'metastatic'])
-    elif graph=='viola':
+    elif graph == 'viola':
         sns.violinplot(x="variable", y="value", hue="group", data=df2, split=True, bw=.6, inner=None, ax=ax)
         ax.legend(['primary', 'metastatic'])
         # fontProperties = dict(family= 'Arial', weight= 'normal', size= 14, rotation=30, ha='right')
-        ax.set_xticklabels(ax.get_xticklabels(), fontproperties )
+        ax.set_xticklabels(ax.get_xticklabels(), fontproperties)
         ax.set_xlabel('')
         # ax.set_ylabel('')
         ax.set_ylabel('Importance Score', fontproperties)
@@ -276,7 +275,7 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
         ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
 
-    elif graph=='swarm':
+    elif graph == 'swarm':
         df2 = pd.melt(df_in, id_vars='group', value_vars=list(features), value_name='value')
         df2['group'] = df2['group'].replace(0, 'Primary')
         df2['group'] = df2['group'].replace(1, 'Metastatic')
@@ -284,19 +283,19 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
 
         current_palette = sns.color_palette()
         ax = sns.swarmplot(x="variable", y="value", data=df2, hue="group",
-                           palette=dict(Primary=current_palette[0], Metastatic=current_palette[1]),  ax=ax)
+                           palette=dict(Primary=current_palette[0], Metastatic=current_palette[1]), ax=ax)
         plt.setp(ax.get_legend().get_texts(), fontsize='14')  # for legend text
         # fontProperties = dict(family='Arial', weight='normal', size=12, rotation=30, ha='right')
         ax.set_xticklabels(ax.get_xticklabels(), fontproperties)
         # ax.tick_params(labelsize=10)
         ax.set_xlabel('')
-        ax.set_ylabel('Importance Score', fontdict=dict(family='Arial',weight='bold', fontsize=14))
+        ax.set_ylabel('Importance Score', fontdict=dict(family='Arial', weight='bold', fontsize=14))
         ax.legend().set_title('')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
 
-    elif graph=='boxplot_custom':
+    elif graph == 'boxplot_custom':
         # fig, (ax1, ax2) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 3]})
         divider = make_axes_locatable(ax)
         ax1 = divider.append_axes('left', size='30%', pad=0.05)
@@ -306,10 +305,12 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
         df2['group'] = df2['group'].replace(0, 'Primary')
         df2['group'] = df2['group'].replace(1, 'Metastatic')
         df2.value = df2.value.abs()
+
         def shorten_name(name):
             if len(name) >= 60:
                 name = name[:60] + ' ...'
             return name
+
         df2['variable'] = df2['variable'].apply(shorten_name)
 
         df2 = df2[df2.value != 0]
@@ -317,11 +318,9 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
         x = MinMaxScaler().fit_transform(df2.value.values.reshape(-1, 1))
         df2.value = x
 
-
         sums = df2.groupby('variable')['value'].sum().sort_values(ascending=False).to_frame()
 
         ax1 = sns.barplot(y='variable', x='value', data=sums.reset_index(), palette="Blues_d", ax=ax1)
-
 
         ax1.invert_xaxis()
         ax1.set_xscale('log')
@@ -339,10 +338,8 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
 
         ax1.set_yticklabels(ax1.get_ymajorticklabels(), fontsize=fontsize)
 
-
-
-        boxplot_csutom(val_col="value", group_col="variable", data =df2, ax=ax2)
-        plot_jitter(val_col="value", group_col="variable", data =df2, ax=ax2)
+        boxplot_csutom(val_col="value", group_col="variable", data=df2, ax=ax2)
+        plot_jitter(val_col="value", group_col="variable", data=df2, ax=ax2)
 
         ax2.set_ylabel('')
 
@@ -361,47 +358,54 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
             if len(name) >= 40:
                 name = name[:40] + ' ...'
             return name
+
         df2['variable'] = df2['variable'].apply(shorten_name)
         # df2.value = df2.value.abs()
         df2 = df2[df2.value != 0]
+
         # sns.set_color_codes("pastel")
         # sns.set_color_codes("muted")
         def abs_sum_estimator(ins):
             return np.abs(np.sum(ins))
-        ax = sns.barplot(y="variable", x="value", data=df2, estimator=abs_sum_estimator, n_boot=1000, ci=95,  ax=ax, color="b", errwidth=1, palette="Blues_d")
+
+        ax = sns.barplot(y="variable", x="value", data=df2, estimator=abs_sum_estimator, n_boot=1000, ci=95, ax=ax,
+                         color="b", errwidth=1, palette="Blues_d")
         sns.despine(left=True, bottom=True)
         ax.set_yticklabels(ax.get_yticklabels(), fontsize=fontsize, horizontalalignment="left")
         ax.tick_params(axis='both', which='major', pad=150)
         # ax.invert_xaxis()
         # ax.set_xscale('log')
-        if layer==6:
+        if layer == 6:
             ax.set_xlabel('Total importance score', fontsize=fontsize)
 
         else:
             ax.set_xlabel('')
 
-        ax.set_ylabel('Layer H{}'.format(layer),fontproperties, labelpad=20)
+        ax.set_ylabel('Layer H{}'.format(layer), fontproperties, labelpad=20)
         ax.set_xticks([], [])
         ax.set_yticks(ax.get_yticks(), [])
         ax.tick_params(axis=u'both', which=u'both', length=0)
 
 
 def shorten_names(name):
-    if len(name)>=60:
-        name= name[:60]+'...'
+    if len(name) >= 60:
+        name = name[:60] + '...'
     return name
 
-fontsize = 5 # legends, axis
+
+fontsize = 5  # legends, axis
 fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
 
+
 def plot_axis(axis):
-    node_importance = pd.read_csv(join(module_path,'figure_3/extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    node_importance = pd.read_csv(join(module_path, 'figure_3/extracted/node_importance_graph_adjusted.csv'),
+                                  index_col=0)
     response = pd.read_csv(join(module_path, 'figure_3/extracted/response.csv'), index_col=0)
     print response.head()
     layers = sorted(list(node_importance.layer.unique()))
     print layers
     # saving_directory = './output/importance'
-    saving_directory =join(saving_dir, 'importance')
+    saving_directory = join(saving_dir, 'importance')
     if not exists(saving_directory):
         makedirs(saving_directory)
 
@@ -415,10 +419,10 @@ def plot_axis(axis):
     # plt.close()
 
     # layers = []
-    for ax, l in zip(axis,layers):
+    for ax, l in zip(axis, layers):
         # fig = plt.figure(figsize=(8, 4), dpi=200)
         print l
-        if l==1:
+        if l == 1:
             # high_nodes = node_importance[node_importance.layer == l].abs().nlargest(10, columns=['coef_combined'])
 
             # plot_high_genes_sns(high_nodes, col='coef_combined', name=str(l), saving_directory=saving_directory)
@@ -444,9 +448,12 @@ def plot_axis(axis):
         # print 'saving', filename
 
         # high_nodes.to_csv(join(saving_directory,'layer_high_{}.csv'.format(l)))
-saving_dir = join(PLOTS_PATH, 'extended_data')
-def run():
 
+
+saving_dir = join(PLOTS_PATH, 'extended_data')
+
+
+def run():
     fig = plt.figure(constrained_layout=False, figsize=(7.2, 9.72))
     spec2 = gridspec.GridSpec(ncols=1, nrows=6, figure=fig)
     ax1 = fig.add_subplot(spec2[0, 0])
@@ -456,17 +463,16 @@ def run():
     ax5 = fig.add_subplot(spec2[4, 0])
     ax6 = fig.add_subplot(spec2[5, 0])
 
-    plot_axis([ax1,ax2,ax3,ax4,ax5,ax6])
+    plot_axis([ax1, ax2, ax3, ax4, ax5, ax6])
     fig.tight_layout()
 
-    plt.gcf().subplots_adjust(left=0.5, right = 0.8, bottom=0.15)
+    plt.gcf().subplots_adjust(left=0.5, right=0.8, bottom=0.15)
     filename = join(saving_dir, 'figure_ed5_importance.png')
     plt.savefig(filename, dpi=300)
+
 
 if __name__ == "__main__":
     run()
 
-#shorten names
-#order layers
-
-
+# shorten names
+# order layers

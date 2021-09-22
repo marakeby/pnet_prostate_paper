@@ -1,26 +1,22 @@
-import pandas as pd
-import numpy as np
-from os.path import  join
-from plotly.offline import plot
+from os.path import join
 import matplotlib.pyplot as plt
-from analysis.figure_3.vis_utils import get_data_trace, get_reactome_pathway_names
+import numpy as np
+import pandas as pd
+from analysis.vis_utils import get_data_trace, get_reactome_pathway_names
+from plotly.offline import plot
 from config_path import BASE_PATH
-# current_dir = dirname(realpath(__file__))
-module_path=join(BASE_PATH, 'analysis/figure_3')
+module_path = join(BASE_PATH, 'analysis/figure_3')
+
 
 def get_node_colors(all_node_labels):
     def color_to_hex(color):
         r, g, b, a = [255 * c for c in color]
-        # c = '#%02X%02X%02X%02X' % (r, g, b, a)
         c = '#%02X%02X%02X' % (r, g, b)
         return c
 
     color_idx = np.linspace(1, 0, len(all_node_labels))
-    # cmp = plt.cm.cool
     cmp = plt.cm.Reds
-    # cmp = plt.cm.RdYlBu
-    # cmp = plt.cm.BrBG_r
-    # cmp = plt.cm.autumn
+
     node_colors = {}
     for i, node in zip(color_idx, all_node_labels):
         colors = list(cmp(i))
@@ -44,7 +40,6 @@ def encode_nodes(df):
 
 
 def get_nlargeest_ind(S):
-    # ind_source = (S - S.median()).abs() > 3. * S.std()
     ind_source = (S - S.median()).abs() > 2. * S.std()
     ret = min([10, int(sum(ind_source))])
     return ret
@@ -77,7 +72,6 @@ def plot_layers(layers, model_name, suffix):
     encoded_top_genes, all_node_ids = encode_nodes(layers_df)
     # rename pathways
     print 'encoded_top_genes\n', encoded_top_genes.head()
-    # print 'layers\n', nodes_per_layer_df.head()
     if reactome_labels:
         all_node_labels = get_pathway_names(all_node_ids)
     else:
@@ -95,8 +89,7 @@ def plot_layers(layers, model_name, suffix):
     node_colors_list = [node_colors[n] for n in all_node_labels]
 
     print 'node_colors', node_colors_list
-    # node_colors = 'rgba(66,148,155,0.5)'
-    # node_colors = None
+
     if color_direction:
         encoded_top_genes['color'] = encoded_top_genes['direction'].replace(
             {True: 'rgba(255, 0 0, 0.2)', False: 'rgba(0, 0, 255, 0.2)'})
@@ -104,23 +97,17 @@ def plot_layers(layers, model_name, suffix):
         encoded_top_genes['color'] = 'rgba(255, 0 0, 0.2)'
 
     print encoded_top_genes.head()
-    # all_node_labels = [l.replace('cnv_amp', 'amplification') for l in all_node_labels]
-    # all_node_labels = [l.replace('cnv_del', 'deletion') for l in all_node_labels]
     data_trace, layout = get_data_trace(encoded_top_genes, all_node_labels, nodes_per_layer_filtered, node_colors_list)
     fig = dict(data=[data_trace], layout=layout)
 
-    # for i, n in enumerate(node_weights_):
-    #     n.to_csv(join(filename, 'layer{}.csv'.format(i)))
-    # filename = join(model_dir, sub_dir)
-    # model_name = model_name.replace('/', '-')
+
     filename = ''
     filename = join(filename, model_name + suffix + '.html')
-    # filename = join(filename, model_name + '.html')
 
     plot(fig, filename=filename)
 
 
-def get_first_layer(node_weights, number_of_best_nodes,interesting_genes=[], col_name='coef', include_others=True):
+def get_first_layer(node_weights, number_of_best_nodes, interesting_genes=[], col_name='coef', include_others=True):
     # type: (list, int, list, str, bool) -> pd.DataFrame
 
     gene_weights = node_weights[1].copy()
@@ -128,15 +115,10 @@ def get_first_layer(node_weights, number_of_best_nodes,interesting_genes=[], col
 
     gene_weights = gene_weights[[col_name]]
     feature_weights = feature_weights[[col_name]]
-    #     w = link_weights_filtered[0].copy()
-    # feature_weights['coef'] = feature_weights['coef'] * w
 
     if number_of_best_nodes == 'auto':
         S = gene_weights[col_name].sort_values()
-        # ind = get_large_ind(S)
         n = get_nlargeest_ind(S)
-        # print ind
-        # top_genes = S.index[ind]
         top_genes = list(gene_weights.nlargest(n, col_name).index)
     else:
         top_genes = list(gene_weights.nlargest(number_of_best_nodes, col_name).index)
@@ -168,8 +150,6 @@ def get_first_layer(node_weights, number_of_best_nodes,interesting_genes=[], col
     df['direction'] = df['value'] >= 0.
     df['value'] = abs(df['value'])
     # normalize per layer
-    # df['value'] = df['value'] / sum(df['value'])
-    #     df['value'] = np.log(df['value'])
 
     df['source'] = df['source'].replace('mut_important', 'mutation')
     df['source'] = df['source'].replace('cnv', 'copy number')
@@ -179,8 +159,7 @@ def get_first_layer(node_weights, number_of_best_nodes,interesting_genes=[], col
 
     # normalize features by gene
     groups = df.groupby('target')
-    #     min = groups['value'].transform(np.min)
-    #     max = groups['value'].transform(np.max)
+
     sum1 = groups['value'].transform(np.sum)
     df['value'] = df['value'] / sum1
     df = df[df.value > 0.0]
@@ -195,35 +174,30 @@ def get_first_layer(node_weights, number_of_best_nodes,interesting_genes=[], col
     return df
 
 
-reactome_labels= True
-color_direction=False
-# filename='/Users/haithamelmarakeby/PycharmProjects/ml_pipeline/run/logs/prostate/prostate_paper/candidates/5/pnet/onsplit_average_reg_10_tanh_large_testing_Jan-29_20-36/fs/o6/deepexplain_deeplift/All/layer_0.csv'
-# filename='/Users/haithamelmarakeby/PycharmProjects/ml_pipeline/analysis/2_paper/visualize model/extracted/gradient_importance_0.csv'
-features_weights = pd.read_csv(join(module_path,'./extracted/gradient_importance_0.csv'), index_col =[0,1])
+reactome_labels = True
+color_direction = False
+features_weights = pd.read_csv(join(module_path, './extracted/gradient_importance_0.csv'), index_col=[0, 1])
 features_weights['layer'] = 0
 nodes_per_layer0 = features_weights[['layer']]
 
-features_weights= features_weights[['coef']]
+features_weights = features_weights[['coef']]
 
 print features_weights.head()
 
 all_weights = pd.read_csv(join(module_path, './extracted/node_importance_graph_adjusted.csv'), index_col=0)
-genes_weights = all_weights[all_weights.layer ==1]
+genes_weights = all_weights[all_weights.layer == 1]
 nodes_per_layer1 = genes_weights[['layer']]
-genes_weights= genes_weights[['coef_combined']]
-genes_weights.columns= ['coef']
+genes_weights = genes_weights[['coef_combined']]
+genes_weights.columns = ['coef']
 
-nodes_per_layer_df= pd.concat([nodes_per_layer0, nodes_per_layer1])
+nodes_per_layer_df = pd.concat([nodes_per_layer0, nodes_per_layer1])
 print genes_weights.head()
 print 'genes_weights', genes_weights
-# node_weights  =pd.read_csv(filename)
 
 node_weights = [features_weights, genes_weights]
-# print node_weights.head()
-number_of_best_nodes= 1
-interesting_genes =['FOXA1', 'SPOP', 'MED12', 'CDK12','PIK3CA', 'CHD1', 'ZBTB7B']
-# interesting_genes=[]
-df = get_first_layer(node_weights, number_of_best_nodes,interesting_genes=interesting_genes,  col_name= 'coef', include_others = False)
+number_of_best_nodes = 1
+interesting_genes = ['FOXA1', 'SPOP', 'MED12', 'CDK12', 'PIK3CA', 'CHD1', 'ZBTB7B']
+df = get_first_layer(node_weights, number_of_best_nodes, interesting_genes=interesting_genes, col_name='coef',
+                     include_others=False)
 print df.head()
-# df.to_csv('first_layer.csv')
 plot_layers([df], 'first_layer_sankey', '')

@@ -1,9 +1,11 @@
-import pandas as pd
 from os.path import join
-from matplotlib import pyplot as plt
+
 import numpy as  np
+import pandas as pd
 # chr	pos	type
 import seaborn as sns
+from matplotlib import pyplot as plt
+
 sns.set(style='ticks', palette='Set2')
 sns.despine()
 from config_path import DATA_PATH
@@ -48,12 +50,12 @@ plt.ylabel('number of mutatations')
 
 plt.savefig('chr_counts')
 
-fig =plt.figure()
+fig = plt.figure()
 fig.set_size_inches(10.5, 6.5)
 
 print df['type'].value_counts()
 # df['type'].value_counts().plot(kind ='bar')
-value_counts = np.log(1 +  df['type'].value_counts())
+value_counts = np.log(1 + df['type'].value_counts())
 height = value_counts
 bars = value_counts.index
 y_pos = np.arange(len(bars))
@@ -69,13 +71,12 @@ plt.xticks(y_pos, bars, rotation='vertical')
 for spine in plt.gca().spines.values():
     spine.set_visible(False)
 
-
 plt.gcf().subplots_adjust(bottom=0.4)
-plt.xlabel('Mutation type', fontsize = 18)
-plt.ylabel('Log (1+mutation count)', fontsize = 18)
+plt.xlabel('Mutation type', fontsize=18)
+plt.ylabel('Log (1+mutation count)', fontsize=18)
 ax.yaxis.set_ticks_position('none')
 ax.xaxis.set_ticks_position('none')
-ax.grid(axis = 'y', color ='white', linestyle='-')
+ax.grid(axis='y', color='white', linestyle='-')
 
 # plt.plot(df['type'].value_counts())
 plt.savefig('mutation_type_counts')

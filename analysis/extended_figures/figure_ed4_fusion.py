@@ -1,36 +1,26 @@
-
-from matplotlib import pyplot as plt, gridspec
-import pandas as pd
-from os.path import join, basename, abspath, dirname
-import os
-
-from matplotlib.ticker import FormatStrFormatter
-
-from config_path import PROSTATE_DATA_PATH, PLOTS_PATH, PROSTATE_LOG_PATH
-
-from os.path import join, basename, dirname
-from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
-from os.path import join, exists
-
-
-from matplotlib import pyplot as plt
-import os
-from os import listdir
-
-from utils.stats_utils import score_ci
-import seaborn as sns
-import numpy as np
-from sklearn import metrics
 import collections
+from os.path import basename, dirname
+from os.path import join
 
-base_dir = join(PROSTATE_LOG_PATH,'review/fusion')
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import gridspec
+from matplotlib import pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
+from sklearn import metrics
 
-files=[]
-files.append(dict(Model ='Fusion',   file=join(base_dir,'onsplit_average_reg_10_tanh_large_testing_fusion')))
-files.append(dict(Model ='no-Fusion',   file=join(base_dir,'onsplit_average_reg_10_tanh_large_testing_fusion_zero')))
-files.append(dict(Model ='Fusion (genes)',   file=join(base_dir,'onsplit_average_reg_10_tanh_large_testing_inner_fusion_genes')))
+from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
+from utils.stats_utils import score_ci
+
+base_dir = join(PROSTATE_LOG_PATH, 'review/fusion')
+
+files = []
+files.append(dict(Model='Fusion', file=join(base_dir, 'onsplit_average_reg_10_tanh_large_testing_fusion')))
+files.append(dict(Model='no-Fusion', file=join(base_dir, 'onsplit_average_reg_10_tanh_large_testing_fusion_zero')))
+files.append(
+    dict(Model='Fusion (genes)', file=join(base_dir, 'onsplit_average_reg_10_tanh_large_testing_inner_fusion_genes')))
 dirs_df = pd.DataFrame(files)
-
 
 
 def sort_dict(all_models_dict):
@@ -48,6 +38,7 @@ def sort_dict(all_models_dict):
     sorted_dict = collections.OrderedDict(sorted_dict)
     return sorted_dict
 
+
 def plot_auc_all(all_models_dict, ax):
     # sort based on area under prc
     n = len(all_models_dict.keys())
@@ -61,14 +52,15 @@ def plot_auc_all(all_models_dict, ax):
         y_pred_score = df['pred_scores']
         plot_roc(ax, y_test, y_pred_score, None, color=colors[i], label=k)
 
+
 def plot_auc_bootstrap(all_models_dict, ax):
     n = len(all_models_dict.keys())
     colors = sns.color_palette(None, n)
 
-    all_scores=[]
-    names=[]
-    xs=[]
-    avg_scores=[]
+    all_scores = []
+    names = []
+    xs = []
+    avg_scores = []
     for i, k in enumerate(all_models_dict.keys()):
         df = all_models_dict[k]
         y_test = df['y']
@@ -81,17 +73,17 @@ def plot_auc_bootstrap(all_models_dict, ax):
         avg_scores.append(score)
 
     all_scores = [x for _, x in sorted(zip(avg_scores, all_scores))]
-    names = [x for _, x in sorted(zip(avg_scores, names ))]
+    names = [x for _, x in sorted(zip(avg_scores, names))]
 
     flierprops = dict(marker='o', markersize=1, alpha=0.7)
-    ax.boxplot(all_scores, labels= names, flierprops=flierprops)
+    ax.boxplot(all_scores, labels=names, flierprops=flierprops)
     ngroup = len(all_scores)
     clevels = np.linspace(0., 1., ngroup)
     for i, (x, val, clevel) in enumerate(zip(xs, all_scores, clevels)):
-        ax.scatter(x, val,marker='.', color=colors[i], alpha=0.1, linewidths=0.2, s=1)
+        ax.scatter(x, val, marker='.', color=colors[i], alpha=0.1, linewidths=0.2, s=1)
 
 
-def plot_roc(ax, y_test, y_pred_score, save_dir,color, label=''):
+def plot_roc(ax, y_test, y_pred_score, save_dir, color, label=''):
     fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_score, pos_label=1)
     roc_auc = metrics.auc(fpr, tpr)
     symbol = '-'
@@ -103,38 +95,37 @@ def plot_roc(ax, y_test, y_pred_score, save_dir,color, label=''):
     ax.set_ylabel('True Positive Rate', fontproperties)
 
 
-
 def read_predictions(dirs_df):
-    model_dict={}
+    model_dict = {}
     for i, row in dirs_df.iterrows():
         dir_ = row.file
         model = row.Model
         dir_ = join(base_dir, dir_)
-        prediction_file = join(dir_,'P-net_ALL_testing.csv')
+        prediction_file = join(dir_, 'P-net_ALL_testing.csv')
         pred_df = pd.read_csv(prediction_file)
         print(pred_df.shape)
         print(pred_df.head())
         model_dict[model] = pred_df
     return model_dict
 
+
 def get_contributions(fusion='no-Fusion'):
-    f= 'fs/coef_P-net_ALL_layerinputs.csv'
-    base_dir = dirs_df[dirs_df.Model==fusion].file.values[0]
+    f = 'fs/coef_P-net_ALL_layerinputs.csv'
+    base_dir = dirs_df[dirs_df.Model == fusion].file.values[0]
     f = join(base_dir, f)
     coef_df = pd.read_csv(f)
-    if fusion =='Fusion':
-        coef_df.columns = ['type','gene','feature', 'coef']
+    if fusion == 'Fusion':
+        coef_df.columns = ['type', 'gene', 'feature', 'coef']
     else:
-        coef_df.columns = ['gene','feature', 'coef']
+        coef_df.columns = ['gene', 'feature', 'coef']
     coef_df['coef_abs'] = coef_df.coef.abs()
     coef_df.head()
     plot_df = coef_df.groupby('feature').coef_abs.sum()
-    plot_df=100*plot_df/plot_df.sum()
+    plot_df = 100 * plot_df / plot_df.sum()
     plot_df.sort_values()
     plot_df = plot_df.to_frame()
-    plot_df.columns=[fusion]
+    plot_df.columns = [fusion]
     return plot_df
-
 
 
 D_id_color = {'Amplification': [0.8784313725490196, 0.4823529411764706, 0.2235294117647059, 0.7],
@@ -144,7 +135,8 @@ D_id_color = {'Amplification': [0.8784313725490196, 0.4823529411764706, 0.223529
               'Fusion (indicator)': 'yellow',
               }
 
-mapping={'cnv_amp':'Amplification', 'cnv_del':'Deletion', 'mut_important':'Mutation','fusion_genes':'Fusion (genes)','fusion_indicator':'Fusion (indicator)'}
+mapping = {'cnv_amp': 'Amplification', 'cnv_del': 'Deletion', 'mut_important': 'Mutation',
+           'fusion_genes': 'Fusion (genes)', 'fusion_indicator': 'Fusion (indicator)'}
 
 
 def plot_contributions(ax):
@@ -180,7 +172,6 @@ def plot_contributions(ax):
     # ax.spines['right'].set_visible(False)
 
 
-
 def plot_auc(ax, model_dict):
     plot_auc_all(model_dict, ax)
     ax.set_xticklabels(ax.get_xticks(), fontsize=fontsize)
@@ -200,6 +191,7 @@ def plot_auc_bootsrtap(ax, model_dict):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
 
 def plot_common_top(ax, dirs_df):
     def read_feature_ranks(dirs_df):
@@ -249,7 +241,7 @@ def plot_common_top(ax, dirs_df):
     ax.legend(['Fusion', 'Fusion (genes)'], fontsize=fontsize, framealpha=0)
     # ax.set_xticks(range(len(layers)), layers)
 
-    ax.set_xticks([0, 1, 2,3,4,5])
+    ax.set_xticks([0, 1, 2, 3, 4, 5])
     ax.set_xticklabels(layers)
 
     for tick in ax.xaxis.get_major_ticks():
@@ -282,7 +274,7 @@ def plot_fusion_indicator_ranking(ax, dirs_df):
     importance['rank'] = range(1, len(importance) + 1)
     importance_log = np.log(importance[col].values + 1)
 
-    ax.plot(importance_log, ".", linewidth = 1.)
+    ax.plot(importance_log, ".", linewidth=1.)
     ax.set_ylabel('Log (importance score +1)', fontsize=fontsize)
 
     ind = importance.feature == 'fusion_indicator'
@@ -314,6 +306,7 @@ def plot_fusion_indicator_ranking(ax, dirs_df):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
+
 def compare_auc_cnv_def(ax):
     base_dir_single_copy = join(PROSTATE_LOG_PATH, 'review/9single_copy')
     base_dir_two_copies = join(PROSTATE_LOG_PATH, 'pnet')
@@ -338,6 +331,7 @@ def compare_auc_cnv_def(ax):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     # plt.title('AUC', fontsize=10)
+
 
 def plot_stability(ax):
     def get_stability_index(df, n_features):
@@ -396,11 +390,11 @@ def plot_stability(ax):
     ax.spines['right'].set_visible(False)
 
 
-fontsize = 5 # legends, axis
+fontsize = 5  # legends, axis
 fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
-current_dir= basename(dirname(__file__))
+current_dir = basename(dirname(__file__))
 saving_dir = join(PLOTS_PATH, 'extended_data')
-model_dict= read_predictions(dirs_df)
+model_dict = read_predictions(dirs_df)
 
 
 def run():
@@ -420,7 +414,7 @@ def run():
     plot_auc_bootsrtap(ax2, model_dict)
     plot_fusion_indicator_ranking(ax3, dirs_df)
     plot_contributions(ax4)
-    plot_common_top(ax5,dirs_df)
+    plot_common_top(ax5, dirs_df)
     # plot_stability(ax8)
     # run([ax1, ax2, ax3, ax4, ax5, ax6])
     # compare_auc_cnv_def(ax7)
@@ -431,13 +425,10 @@ def run():
     # ax6.spines['left'].set_visible(False)
     fig.tight_layout()
 
-    plt.gcf().subplots_adjust(left=0.1, right=0.9,bottom=0.2, wspace=0.7, hspace=0.4)
+    plt.gcf().subplots_adjust(left=0.1, right=0.9, bottom=0.2, wspace=0.7, hspace=0.4)
     filename = join(saving_dir, 'figure_ed4_fusion.png')
     plt.savefig(filename, dpi=300)
 
 
 if __name__ == '__main__':
     run()
-
-
-

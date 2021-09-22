@@ -7,7 +7,7 @@ data_base = {'id': 'ALL', 'type': 'prostate_paper',
              'params': {
                  'data_type': ['mut_important', 'cnv_del', 'cnv_amp'],
                  # 'data_type': ['gene_expression'],
-                 'account_for_data_type' : ['TMB'],
+                 'account_for_data_type': ['TMB'],
                  'drop_AR': False,
                  'cnv_levels': 3,
                  'mut_binary': True,

@@ -1,49 +1,39 @@
-import os
-import sys
-# from setup import saving_dir
-# from vis_utils import get_reactome_pathway_names
-from os.path import join, dirname, realpath, exists
-
-from analysis.figure_3.vis_utils import get_reactome_pathway_names
+from os.path import join
+from analysis.vis_utils import get_reactome_pathway_names
 from config_path import BASE_PATH
-# current_dir = dirname(realpath(__file__))
-module_path=join(BASE_PATH, 'analysis/figure_3')
+module_path = join(BASE_PATH, 'analysis/figure_3')
 import pandas as pd
 import numpy as np
 from os.path import join
-from plotly.offline import plot
 import matplotlib.pyplot as plt
 
 '''
 first layer
 '''
 
+
 def get_first_layer_df(nlargest):
     features_weights = pd.read_csv(join(module_path, './extracted/gradient_importance_0.csv'), index_col=[0, 1])
     features_weights['layer'] = 0
     nodes_per_layer0 = features_weights[['layer']]
     features_weights = features_weights[['coef']]
-    # genes_weights = node_importance[node_importance.layer == 1]
-    # node_weights = [features_weights, genes_weights]
+
 
     all_weights = pd.read_csv(join(module_path, './extracted/node_importance_graph_adjusted.csv'), index_col=0)
     genes_weights = all_weights[all_weights.layer == 1]
     nodes_per_layer1 = genes_weights[['layer']]
     genes_weights = genes_weights[['coef_combined']]
-    # genes_weights = genes_weights[[col_name]]
     genes_weights.columns = ['coef']
 
     nodes_per_layer_df = pd.concat([nodes_per_layer0, nodes_per_layer1])
     print genes_weights.head()
     print 'genes_weights', genes_weights
-    # node_weights  =pd.read_csv(filename)
 
     node_weights = [features_weights, genes_weights]
 
     df = get_first_layer(node_weights, number_of_best_nodes=nlargest[0], col_name='coef', include_others=True)
-    # print df.head()
     saving_dir = './'
-    df.to_csv(join(saving_dir,'first_layer.csv'))
+    df.to_csv(join(saving_dir, 'first_layer.csv'))
     first_layer_df = df[['source', 'target', 'value', 'layer']]
     return first_layer_df
 
@@ -60,6 +50,7 @@ important_node_connections_df
 source	target	layer	value	value_abs	child_sum_target	child_sum_source	value_normalized_by_target	value_normalized_by_source	target_importance	source_importance	A	B	value_final	value_old	source_fan_out	source_fan_out_error	target_fan_in	target_fan_in_error	value_final_corrected
 '''
 
+
 def encode_nodes(df):
     source = df['source']
     target = df['target']
@@ -70,7 +61,6 @@ def encode_nodes(df):
 
 
 def get_nlargeest_ind(S):
-    # ind_source = (S - S.median()).abs() > 3. * S.std()
     ind_source = (S - S.median()).abs() > 2. * S.std()
     ret = min([10, int(sum(ind_source))])
     return ret
@@ -93,11 +83,13 @@ def get_nodes_per_layer_filtered(nodes_per_layer_df, all_node_ids, all_node_labe
     nodes_per_layer_filtered_df.index = nodes_per_layer_filtered_df.index.map(lambda x: mapping_dict[x])
     return nodes_per_layer_filtered_df
 
-features_weights = pd.read_csv(join(module_path,'./extracted/gradient_importance_0.csv'), index_col =[0,1])
+
+features_weights = pd.read_csv(join(module_path, './extracted/gradient_importance_0.csv'), index_col=[0, 1])
 features_weights = features_weights.reset_index()
-features_weights.columns= ['target', 'source', 'value']
+features_weights.columns = ['target', 'source', 'value']
 features_weights['layer'] = 0
 features_weights.head()
+
 
 def get_links_with_first_layer():
     '''
@@ -123,6 +115,7 @@ def get_links_with_first_layer():
 
     return all_links_df
 
+
 def get_links():
     '''
     :return: all_links_df: dataframe with all the connections in the model (except first layer)
@@ -141,7 +134,7 @@ def get_links():
     return all_links_df
 
 
-def get_high_nodes(node_importance, nlargest, column ):
+def get_high_nodes(node_importance, nlargest, column):
     '''
     get n largest nodes in each layer
     :param:  node_importance: dataframe with coef_combined  and layer columns
@@ -159,8 +152,7 @@ def get_high_nodes(node_importance, nlargest, column ):
     return high_nodes
 
 
-def filter_nodes(node_importance, high_nodes,  add_others=True):
-
+def filter_nodes(node_importance, high_nodes, add_others=True):
     high_nodes_df = node_importance[node_importance.index.isin(high_nodes)].copy()
     # add others:
 
@@ -226,6 +218,7 @@ def get_x_y(df_encoded, layers_nodes):
     :param layers_nodes: data frame with index (nodes ) and one columns (layer) representing the layer of the node
     :return: x, y positions onf each node
     '''
+
     # node_id = range(len(layers_nodes))
     # node_weights = pd.DataFrame([node_id, layers_nodes], columns=['node_id', 'node_name'])
     # print node_weights
@@ -236,7 +229,6 @@ def get_x_y(df_encoded, layers_nodes):
         if in_min == in_max:
             return val
         return out_min + (val - in_min) * ((out_max - out_min) / (in_max - in_min))
-
 
     source_weights = df_encoded.groupby(by='source')['value'].sum()
     target_weights = df_encoded.groupby(by='target')['value'].sum()
@@ -250,7 +242,6 @@ def get_x_y(df_encoded, layers_nodes):
     # print node_weights
 
     node_weights = node_weights.join(layers_nodes)
-    # node_weights['value'] = node_weights.groupby('layer')['value'].apply(lambda x: rescale(x, min(x), max(x), 0., 1.))
 
     ind = node_weights.index.str.contains('others')
 
@@ -258,63 +249,24 @@ def get_x_y(df_encoded, layers_nodes):
     print 'others_value', others_value
     node_weights.loc[ind, 'value'] = 0.
     node_weights.sort_values(by=['layer', 'value'], ascending=False, inplace=True)
-    # maxx = node_weights.groupby('layer')['value'].transform(pd.Series.max)
     print 'others_value', others_value
     node_weights.loc[others_value.index, 'value'] = others_value
     n_layers = len(layers_nodes['layer'].unique())
-    # node_weights['x'] = node_weights['layer'] /n_layers
-    node_weights['x'] = (node_weights['layer']-2) *0.1 + 0.16
-    ind = node_weights.layer==0
-    node_weights.loc[ind,'x' ] = 0.01
-    ind = node_weights.layer==1
-    node_weights.loc[ind,'x' ] = 0.08
-    ind = node_weights.layer==2
-    node_weights.loc[ind,'x' ] = 0.16
-    # node_weights['x'] = node_weights['layer']
-    print 'node_weights',node_weights
+    node_weights['x'] = (node_weights['layer'] - 2) * 0.1 + 0.16
+    ind = node_weights.layer == 0
+    node_weights.loc[ind, 'x'] = 0.01
+    ind = node_weights.layer == 1
+    node_weights.loc[ind, 'x'] = 0.08
+    ind = node_weights.layer == 2
+    node_weights.loc[ind, 'x'] = 0.16
+    print 'node_weights', node_weights
     node_weights.to_csv('node_weights.csv')
     node_weights['layer_weight'] = node_weights.groupby('layer')['value'].transform(pd.Series.sum)
     node_weights['y'] = node_weights.groupby('layer')['value'].transform(pd.Series.cumsum)
-    # node_weights['y'] = node_weights.groupby('layer')['value'].transform(pd.Series.cumsum)
-    # node_weights['y'] = node_weights['value']
-
-
-    # node_weights['y'] = (node_weights['y'] - node_weights['value'] / 2) / node_weights['layer_weight'] + 0.01
-    # max_layer= node_weights['layer_weight'].max()
-    # max_layer= node_weights['layer_weight'].min()
-    # node_weights['y'] = (node_weights['y'] - .2* node_weights['value'] ) / max_layer
-    # node_weights['y'] = (node_weights['y'] - .5* node_weights['value'] ) /node_weights['layer_weight']
-    # node_weights['y'] = (node_weights['y'] -  node_weights['value'] ) /node_weights['layer_weight']
-    node_weights['y'] = (node_weights['y'] -  .5 * node_weights['value']) /(1.5*node_weights['layer_weight'])
-    # node_weights['y'] = (node_weights['y'] ) /node_weights['layer_weight']
-    # node_weights['y'] = (node_weights['y'] -  .2 * node_weights['value']) /node_weights['layer_weight']
-
-
-    # node_weights['y'] = node_weights['y']-  node_weights['value']
-    # node_weights['y'] = (node_weights['y'] -  node_weights['value'] ) /max_layer
-    # node_weights['y'] = (node_weights['y']  ) / max_layer
-    # node_weights['y'] = (node_weights['y'] - node_weights['value'] ) / node_weights['layer_weight'] + 0.01
-    # node_weights['y'] = node_weights['y'] - node_weights['value']/2.
-    # node_weights['y'] = node_weights.groupby('layer')['y'].apply(lambda x: (x - min(x)) / (max(x) - min(x)))
-
-    # for l in layers:
-    #     ind= node_weights[node_weights.layer==l]
-
-    # node_weights['y'] = node_weights.groupby('layer')['y'].apply(lambda x: rescale( x , min(x),  max(x), 0.1, .9))
-    # node_weights['y'] = node_weights.groupby('layer')['y'].apply(lambda x: rescale( x , min(x),  max(x),min(x),  max(x)))
-
-    # node_weights['y'] = node_weights['y']+ 0.001
-
-
-
-    # node_weights['y'] = ((node_weights['y'] - node_weights['value']) / node_weights['layer_weight'])
-    # node_weights['y'] = (node_weights['y'] ) / node_weights['layer_weight']
-
+    node_weights['y'] = (node_weights['y'] - .5 * node_weights['value']) / (1.5 * node_weights['layer_weight'])
 
     print 'node_weights', node_weights['x'], node_weights['y']
     node_weights.sort_index(inplace=True)
-    # ind = node_weights.index.str.contains('others')
-    # node_weights.loc[ind, 'y'] = node_weights.loc[ind, 'y']+.5
     node_weights.to_csv('xy.csv')
     return node_weights['x'], node_weights['y']
 
@@ -341,25 +293,16 @@ def get_data_trace(linkes, all_node_labels, node_pos, layers, node_colors=None):
         #         hovertext=all_node_labels,
         node=dict(
             pad=2,
-            #             pad=20,
-
             thickness=30,
             line=dict(
-                # color="black",
                 color="white",
                 width=2.
             ),
             label=all_node_labels,
-            # label=y,
-            #             hoverlabel   = all_node_labels,
-            #       label =  ['all_node_labels'] *15,
 
-            # color = '#262C46'
             x=x,
             y=y,
             color=node_colors if node_colors else None,
-            #             bordercolor='rgba(255, 255, 255, 1.)'
-            #             thickness=0.
         ),
         link=dict(
             source=linkes['source'],
@@ -377,22 +320,7 @@ def get_data_trace(linkes, all_node_labels, node_pos, layers, node_colors=None):
         font=dict(
             size=13, family='Arial',
         )
-        # updatemenus=[dict(
-        #     y=0.6,
-        #     buttons=[
-        #         dict(
-        #             label='Horizontal',
-        #             method='restyle',
-        #             args=['orientation', 'h']
-        #         ),
-        #         dict(
-        #             label='Vertical',
-        #             method='restyle',
-        #             args=['orientation', 'v']
-        #         )
-        #     ]
 
-        # )]
     )
     return data_trace, layout
 
@@ -400,37 +328,24 @@ def get_data_trace(linkes, all_node_labels, node_pos, layers, node_colors=None):
 def get_node_colors(all_node_labels, remove_others=True):
     def color_to_hex(color):
         r, g, b, a = [255 * c for c in color]
-        # c = '#%02X%02X%02X%02X' % (r, g, b, a)
         c = '#%02X%02X%02X' % (r, g, b)
         return c
 
     color_idx = np.linspace(1, 0, len(all_node_labels))
-    # cmp = plt.cm.cool
     cmp = plt.cm.Reds
-    # cmp = plt.cm.Blues
-    # cmp = plt.cm.RdYlBu
-    # cmp = plt.cm.BrBG_r
-    # cmp = plt.cm.autumn
     node_colors = {}
     for i, node in zip(color_idx, all_node_labels):
         if 'other' in node:
             if remove_others:
-                # c = 'rgba(255, 255, 255, 0.0)'
                 c = (255, 255, 255, 0.0)
             else:
-                #                 c = 'rgba(192, 192, 192, 0.5)'
-                # c = 'rgba(255, 255, 255, 0.5)'
-                # c = (255, 255, 255, 0.5)
-                c = (232,232,232, 0.5)
+                c = (232, 232, 232, 0.5)
         else:
             colors = list(cmp(i))
             colors = [int(255 * c) for c in colors]
             colors[-1] = 0.7  # set alpha
-            # c = color_to_hex(c)
-            # c = 'rgba{}'.format(tuple(colors))
-            # c = 'rgba{}'.format(tuple(colors))
-            c= colors
-        #         print c
+
+            c = colors
         node_colors[node] = c
 
     return node_colors
@@ -449,7 +364,6 @@ def get_edge_colors(df, node_colors_dict, remove_others=True):
             base_color = [l for l in node_colors_dict[row['source']]]
             base_color[-1] = 0.2
             base_color = 'rgba{}'.format(tuple(base_color))
-            # colors.append('rgba(192,192,192,0.5)')
             colors.append(base_color)
     return colors
 
@@ -463,11 +377,8 @@ def get_node_colors_ordered(high_nodes_df, col_name, remove_others=True):
     for l in layers:
         nodes_ordered = high_nodes_df[high_nodes_df.layer == l].sort_values(col_name, ascending=False).index
         node_colors.update(get_node_colors(nodes_ordered, remove_others))
-
-    #     node_colors_list= []
-    #     for l in all_node_labels:
-    #         node_colors_list.append(node_colors[l])
     return node_colors
+
 
 def get_first_layer(node_weights, number_of_best_nodes, col_name='coef', include_others=True):
     gene_weights = node_weights[1].copy()
@@ -475,15 +386,10 @@ def get_first_layer(node_weights, number_of_best_nodes, col_name='coef', include
 
     gene_weights = gene_weights[[col_name]]
     feature_weights = feature_weights[[col_name]]
-    #     w = link_weights_filtered[0].copy()
-    # feature_weights['coef'] = feature_weights['coef'] * w
 
     if number_of_best_nodes == 'auto':
         S = gene_weights[col_name].sort_values()
-        # ind = get_large_ind(S)
         n = get_nlargeest_ind(S)
-        # print ind
-        # top_genes = S.index[ind]
         top_genes = list(gene_weights.nlargest(n, col_name).index)
     else:
         top_genes = list(gene_weights.nlargest(number_of_best_nodes, col_name).index)
@@ -500,8 +406,6 @@ def get_first_layer(node_weights, number_of_best_nodes, col_name='coef', include
 
     if include_others:
         df = df.reset_index()
-        # print 'df'
-        # print df.head()
         df.columns = ['target', 'source', 'value']
         df['target'] = df['target'].map(lambda x: x if x in top_genes else 'others1')
         df = df.groupby(['source', 'target']).sum()
@@ -517,49 +421,37 @@ def get_first_layer(node_weights, number_of_best_nodes, col_name='coef', include
         df = df.reset_index()
         df.columns = ['target', 'source', 'value']
 
-    # df = df.reset_index()
-    # df.columns = ['target', 'source', 'value']
     df['direction'] = df['value'] >= 0.
     df['value'] = abs(df['value'])
-    # normalize per layer
-    # df['value'] = df['value'] / sum(df['value'])
-    #     df['value'] = np.log(df['value'])
-
     df['source'] = df['source'].replace('mut_important', 'mutation')
     df['source'] = df['source'].replace('cnv', 'copy number')
     df['source'] = df['source'].replace('cnv_amp', 'amplification')
     df['source'] = df['source'].replace('cnv_del', 'deletion')
     df['layer'] = 0
 
-    # normalize features by gene
-    # groups = df.groupby('target')
-
-    # sum1 = groups['value'].transform(np.sum)
     df['value'] = df['value'] / df.groupby('target')['value'].transform(np.sum)
     df = df[df.value > 0.0]
 
     # multiply by the gene importance
-    # df = pd.merge(df, genes, left_on='target', right_index=True, how='inner')
     # genes
     df = pd.merge(df, genes, left_on='target', right_index=True, how='left')
     print df.shape
     df.coef.fillna(10.0, inplace=True)
-    df.value = df.value * df.coef*150.
+    df.value = df.value * df.coef * 150.
 
     print df.shape
 
     return df
 
+
 def get_fromated_network(links, high_nodes_df, col_name, remove_others):
-
-
     # get node colors
     node_colors_dict = get_node_colors_ordered(high_nodes_df, col_name, remove_others)
 
     print 'node_colors_dict', node_colors_dict
-    #exception for first layer
+    # exception for first layer
     node_colors_dict['amplification'] = (224, 123, 57, 0.7)  # amps
-    node_colors_dict['deletion'] = (1, 55, 148, 0.7) # deletion
+    node_colors_dict['deletion'] = (1, 55, 148, 0.7)  # deletion
     node_colors_dict['mutation'] = (105, 189, 210, 0.7)  # mutation
 
     # get colors
@@ -574,8 +466,6 @@ def get_fromated_network(links, high_nodes_df, col_name, remove_others):
 
     # get node per layers
     node_layers = high_nodes_df[['layer']]
-    # mapp = dict(zip(all_node_labels, range(len(all_node_labels))))
-    # node_layers = node_layers.rename(index=mapp)
 
     # remove self connection
     ind = linkes_filtred_encoded_df.source == linkes_filtred_encoded_df.target
@@ -583,21 +473,18 @@ def get_fromated_network(links, high_nodes_df, col_name, remove_others):
 
     # make sure we positive values for all edges
     linkes_filtred_encoded_df.value = linkes_filtred_encoded_df.value.abs()
-
-    # x, y = get_x_y(linkes_filtred_encoded_df, node_layers)
-
     x, y = get_x_y(links, node_layers)
 
     # shorten names
     all_node_labels_short = []
     for n in all_node_labels:
         to_be_added = str(n)
-        if len(to_be_added) >30:
+        if len(to_be_added) > 30:
             to_be_added = to_be_added[:20] + ' ...'
-        if 'others' in to_be_added :
-            to_be_added ='residual'
-        if 'root' in to_be_added :
-            to_be_added ='outcome'
+        if 'others' in to_be_added:
+            to_be_added = 'residual'
+        if 'root' in to_be_added:
+            to_be_added = 'outcome'
         all_node_labels_short.append(to_be_added)
 
     node_colors_list = []
@@ -611,7 +498,6 @@ def get_fromated_network(links, high_nodes_df, col_name, remove_others):
 # #remove self connections
 
 
-
 def get_MDM4_nodes(links_df):
     import networkx as nx
     net = nx.from_pandas_edgelist(links_df, 'target', 'source', create_using=nx.DiGraph())
@@ -621,7 +507,7 @@ def get_MDM4_nodes(links_df):
     root_node = 'root'
     edges = [(root_node, n) for n in roots]
     net.add_edges_from(edges)
-    #convert to tree
+    # convert to tree
     tree = nx.bfs_tree(net, 'root')
 
     traces = list(nx.all_simple_paths(tree, 'root', 'MDM4'))
@@ -637,24 +523,20 @@ def get_MDM4_nodes(links_df):
 
 
 def run():
-
-    #get reactome pathway ids and names
+    # get reactome pathway ids and names
     reactome_pathway_df = get_reactome_pathway_names()
-    id_to_name_dict = dict(zip(reactome_pathway_df.id,reactome_pathway_df.name))
-    name_to_id_dict = dict(zip(reactome_pathway_df.name,reactome_pathway_df.id))
-
+    id_to_name_dict = dict(zip(reactome_pathway_df.id, reactome_pathway_df.name))
+    name_to_id_dict = dict(zip(reactome_pathway_df.name, reactome_pathway_df.id))
 
     # nlargest= [10, 8, 8, 8, 7, 6]
-    nlargest= [10, 10, 10, 10, 6, 6, 6]
+    nlargest = [10, 10, 10, 10, 6, 6, 6]
     # nlargest= 10
 
-
-    node_importance = pd.read_csv(join(module_path, './extracted/node_importance_graph_adjusted.csv'), index_col= 0)
+    node_importance = pd.read_csv(join(module_path, './extracted/node_importance_graph_adjusted.csv'), index_col=0)
     #####
     # node_importance.coef_combined = node_importance.coef
 
-
-    node_id=[]
+    node_id = []
     for x in node_importance.index:
         if x in name_to_id_dict.keys():
             node_id.append(name_to_id_dict[x])
@@ -662,34 +544,25 @@ def run():
             node_id.append(x)
     node_importance['node_id'] = node_id
 
-
     col_name = 'coef'
-    interesting_genes  = ['FOXA1', 'SPOP', 'MED12', 'CDK12','PIK3CA', 'CHD1', 'ZBTB7B']
-    first_layer_nodes = node_importance[node_importance.layer==1].copy()
-    other_layer_nodes = node_importance[node_importance.layer!=1].copy()
-    # high_nodes_first_layer = get_high_nodes(first_layer_nodes, nlargest=nlargest, column='coef_combined')
+    interesting_genes = ['FOXA1', 'SPOP', 'MED12', 'CDK12', 'PIK3CA', 'CHD1', 'ZBTB7B']
+    first_layer_nodes = node_importance[node_importance.layer == 1].copy()
+    other_layer_nodes = node_importance[node_importance.layer != 1].copy()
     high_nodes_first_layer = get_high_nodes(first_layer_nodes, nlargest=nlargest, column='coef_combined')
     print('high_nodes_first_layer', high_nodes_first_layer)
-    # high_nodes_first_layer = get_high_nodes(first_layer_nodes, nlargest=nlargest, column='coef')
-    high_nodes_pathways= get_high_nodes(other_layer_nodes, nlargest=nlargest, column='coef')
-    # high_nodes_pathways= get_high_nodes(other_layer_nodes, nlargest=nlargest, column='coef_combined')
-    # high_nodes = high_nodes_first_layer+ high_nodes_pathways + interesting_genes
-    high_nodes = high_nodes_first_layer+ high_nodes_pathways + interesting_genes
-    # high_nodes =  interesting_genes
+    high_nodes_pathways = get_high_nodes(other_layer_nodes, nlargest=nlargest, column='coef')
+    high_nodes = high_nodes_first_layer + high_nodes_pathways + interesting_genes
     print 'high_nodes', high_nodes
     high_nodes_df = filter_nodes(node_importance, high_nodes)
-
 
     high_nodes_ids = list(high_nodes_df.node_id.values)
 
     links_df = get_links()
-    # links_df = get_links_with_first_layer()
-
     '''
     MDM4
     '''
     mdm4_nodes = get_MDM4_nodes(links_df)
-    mdm4_nodes_names =[]
+    mdm4_nodes_names = []
     for n in mdm4_nodes:
         if n in id_to_name_dict.keys():
             mdm4_nodes_names.append(id_to_name_dict[n])
@@ -699,32 +572,29 @@ def run():
     print 'mdm4_nodes', mdm4_nodes_names
 
     ind = links_df.source == links_df.target
-    links_df= links_df[~ind]
-
+    links_df = links_df[~ind]
 
     # # keep important nodes only
     links_df = filter_connections(links_df, high_nodes_ids, add_unk=True)
 
-    links_df= links_df.reset_index()
+    links_df = links_df.reset_index()
 
-    # print links_df.head()
     links_df['value_abs'] = links_df.value.abs()
 
     links_df['child_sum_target'] = links_df.groupby('target').value_abs.transform(np.sum)
     links_df['child_sum_source'] = links_df.groupby('source').value_abs.transform(np.sum)
-    links_df['value_normalized_by_target'] = 100*links_df.value_abs /links_df.child_sum_target
-    links_df['value_normalized_by_source'] = 100*links_df.value_abs /links_df.child_sum_source
+    links_df['value_normalized_by_target'] = 100 * links_df.value_abs / links_df.child_sum_target
+    links_df['value_normalized_by_source'] = 100 * links_df.value_abs / links_df.child_sum_source
 
     #
-    node_importance['coef_combined_normalized_by_layer'] =100.*node_importance[col_name]/node_importance.groupby('layer')[col_name].transform(np.sum)
-    # node_importance['coef_combined_normalized_by_layer'] =100.*node_importance.coef_combined/node_importance.groupby('layer').coef.transform(np.sum)
-    # node_importance['coef_combined_normalized_by_layer'] =100.*node_importance.coef_combined
-    node_importance_ = node_importance[['node_id', 'coef_combined_normalized_by_layer',col_name]].copy()
-    #
-    #
-    node_importance_['coef_combined_normalized_by_layer']= np.log(1. + node_importance_.coef_combined_normalized_by_layer)
+    node_importance['coef_combined_normalized_by_layer'] = 100. * node_importance[col_name] / \
+                                                           node_importance.groupby('layer')[col_name].transform(np.sum)
+
+    node_importance_ = node_importance[['node_id', 'coef_combined_normalized_by_layer', col_name]].copy()
+
+    node_importance_['coef_combined_normalized_by_layer'] = np.log(
+        1. + node_importance_.coef_combined_normalized_by_layer)
     node_importance_normalized = node_importance_[['node_id', 'coef_combined_normalized_by_layer']]
-    # # node_importance_normalized = node_importance_[['node_id', 'coef_combined']]
     node_importance_normalized = node_importance_normalized.set_index('node_id')
     node_importance_normalized.columns = ['target_importance']
     #
@@ -735,22 +605,22 @@ def run():
     df = links_df_.copy()
     df['A'] = df.value_normalized_by_source * df.source_importance
     df['B'] = df.value_normalized_by_target * df.target_importance
-    df['value_final']  = df[["A", "B"]].min(axis=1)
+    df['value_final'] = df[["A", "B"]].min(axis=1)
     #
-    df['value_old']  = df.value
-    df.value  = df.value_final
+    df['value_old'] = df.value
+    df.value = df.value_final
     #
     df['source_fan_out'] = df.groupby('source').value_final.transform(np.sum)
-    df['source_fan_out_error'] = np.abs(df.source_fan_out - 100.*df.source_importance)
+    df['source_fan_out_error'] = np.abs(df.source_fan_out - 100. * df.source_importance)
 
     df['target_fan_in'] = df.groupby('target').value_final.transform(np.sum)
-    df['target_fan_in_error'] = np.abs(df.target_fan_in - 100.*df.target_importance)
+    df['target_fan_in_error'] = np.abs(df.target_fan_in - 100. * df.target_importance)
     #
     #
-    ind  = df.source.str.contains('others')
-    df['value_final_corrected']  = df.value_final
+    ind = df.source.str.contains('others')
+    df['value_final_corrected'] = df.value_final
     df.loc[ind, 'value_final_corrected'] = df[ind].value_final + df[ind].target_fan_in_error
-    ind  = df.target.str.contains('others')
+    ind = df.target.str.contains('others')
 
     df.loc[ind, 'value_final_corrected'] = df[ind].value_final_corrected + df[ind].source_fan_out_error
 
@@ -761,9 +631,9 @@ def run():
     important_node_connections_df.to_csv('important_node_connections_df.csv')
     high_nodes_df.to_csv('high_nodes_df.csv')
 
-    high_nodes_df=high_nodes_df[[col_name, 'layer']]
+    high_nodes_df = high_nodes_df[[col_name, 'layer']]
 
-    #add feature nodes
+    # add feature nodes
     high_nodes_df.loc['mutation'] = [1, 0]
     high_nodes_df.loc['amplification'] = [1, 0]
     high_nodes_df.loc['deletion'] = [1, 0]
@@ -771,18 +641,21 @@ def run():
 
     # add first layer
     first_layer_df = get_first_layer_df(nlargest)
-    links_df  = pd.concat([first_layer_df, important_node_connections_df])
+    links_df = pd.concat([first_layer_df, important_node_connections_df])
 
-    linkes_filtred_, all_node_labels, pos, node_layers, node_colors_list =  get_fromated_network(links_df,high_nodes_df, col_name=col_name, remove_others=False)
-    data_trace, layout = get_data_trace(linkes_filtred_, all_node_labels, pos, node_layers,  node_colors= node_colors_list)
+    linkes_filtred_, all_node_labels, pos, node_layers, node_colors_list = get_fromated_network(links_df, high_nodes_df,
+                                                                                                col_name=col_name,
+                                                                                                remove_others=False)
+    data_trace, layout = get_data_trace(linkes_filtred_, all_node_labels, pos, node_layers,
+                                        node_colors=node_colors_list)
     # #
     fig = dict(data=[data_trace], layout=layout)
     #
     from plotly.offline import plot
-    saving_dir='./'
+    saving_dir = './'
     filename = join(saving_dir, 'sankey.html')
-    plot(fig,  filename=filename)
-#
+    plot(fig, filename=filename)
+
 
 if __name__ == "__main__":
     run()

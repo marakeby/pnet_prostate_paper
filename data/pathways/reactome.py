@@ -1,12 +1,11 @@
 import re
-from os.path import join, dirname, expanduser
 import networkx as nx
 import pandas as pd
-from data.gmt_reader import GMT
+from os.path import join
 from config_path import REACTOM_PATHWAY_PATH
+from data.gmt_reader import GMT
 
-
-reactome_base_dir=  REACTOM_PATHWAY_PATH
+reactome_base_dir = REACTOM_PATHWAY_PATH
 relations_file_name = 'ReactomePathwaysRelation.txt'
 pathway_names = 'ReactomePathways.txt'
 pathway_genes = 'ReactomePathways.gmt'
@@ -29,8 +28,6 @@ def complete_network(G, n_leveles=4):
     sub_graph = nx.ego_graph(G, 'root', radius=n_leveles)
     terminal_nodes = [n for n, d in sub_graph.out_degree() if d == 0]
     distances = [len(nx.shortest_path(G, source='root', target=node)) for node in terminal_nodes]
-    # nunique, counts = np.unique(distances, return_counts=True)
-
     for node in terminal_nodes:
         distance = len(nx.shortest_path(sub_graph, source='root', target=node))
         if distance <= n_leveles:
@@ -102,7 +99,6 @@ class ReactomeNetwork():
 
     def get_roots(self):
 
-        # roots = [n for n, d in self.netx.in_degree() if d == 0]
         roots = get_nodes_at_level(self.netx, distance=1)
         return roots
 
@@ -147,12 +143,10 @@ class ReactomeNetwork():
         if direction == 'root_to_leaf':
             net = self.get_completed_network(n_levels)
             layers = get_layers_from_net(net, n_levels)
-            # layers=layers[:-2]
         else:
             net = self.get_completed_network(5)
-            layers = get_layers_from_net(net,5)
+            layers = get_layers_from_net(net, 5)
             layers = layers[5 - n_levels:5]
-
 
         # get the last layer (genes level)
         terminal_nodes = [n for n, d in net.out_degree() if d == 0]  # set of terminal pathways

@@ -1,14 +1,16 @@
 import os
 from copy import deepcopy
 from os.path import dirname
+
 import numpy as np
+
 from model.builders.prostate_models import build_dense
 
 base_dirname = dirname(dirname(__file__))
 print (base_dirname)
 filename = os.path.basename(__file__)
 task = 'classification_binary'
-#need to stired under 'data/genes'
+# need to stired under 'data/genes'
 selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes.csv'
 data_base = {'id': 'ALL', 'type': 'prostate_paper',
              'params': {

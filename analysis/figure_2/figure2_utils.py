@@ -1,20 +1,21 @@
+from os.path import join
+
+import pandas as pd
+import seaborn as sns
 from matplotlib.ticker import FormatStrFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import pandas as pd
-from os.path  import join
-
 from scipy import stats
 
 from config_path import PROSTATE_LOG_PATH
-import seaborn as sns
+
 
 def get_dense_sameweights(col='f1'):
     filename = join(PROSTATE_LOG_PATH, 'number_samples/crossvalidation_number_samples_dense_sameweights')
-    filename = filename+'/folds.csv'
-    df = pd.read_csv(filename, index_col = 0, header=[0,1])
+    filename = filename + '/folds.csv'
+    df = pd.read_csv(filename, index_col=0, header=[0, 1])
     # print df.head()
     # print df.head()
-    dd = df.swaplevel(0,1, axis=1)[col].head()
+    dd = df.swaplevel(0, 1, axis=1)[col].head()
     df_pnet_col = [c for c in dd.columns if 'dense' in c]
     df_pnet = dd[df_pnet_col]
     return df_pnet
@@ -22,9 +23,9 @@ def get_dense_sameweights(col='f1'):
 
 def get_pnet_preformance(col='f1'):
     filename = join(PROSTATE_LOG_PATH, 'number_samples/crossvalidation_average_reg_10_tanh')
-    filename = filename+'/folds.csv'
-    df = pd.read_csv(filename, index_col = 0, header=[0,1])
-    dd = df.swaplevel(0,1, axis=1)[col].head()
+    filename = filename + '/folds.csv'
+    df = pd.read_csv(filename, index_col=0, header=[0, 1])
+    dd = df.swaplevel(0, 1, axis=1)[col].head()
     df_pnet_col = [c for c in dd.columns if 'P-net' in c]
     df_pnet = dd[df_pnet_col]
     return df_pnet
@@ -39,11 +40,10 @@ def get_stats(df_pnet, df_dense):
         y = df_dense.loc[:, c2]
 
         twosample_results = stats.ttest_ind(x, y)
-        pvalue = twosample_results[1]/2
+        pvalue = twosample_results[1] / 2
         print pvalue
         pvalues.append(pvalue)
     return pvalues
-
 
 
 def plot_compaison(ax1, label, df_pnet, df_dense, sizes, linewidth):
@@ -52,19 +52,18 @@ def plot_compaison(ax1, label, df_pnet, df_dense, sizes, linewidth):
     x = sizes
     sns.set_color_codes('muted')
     current_palette = sns.color_palette()
-    colors=current_palette[0:2]
-    ax1.plot(x, y1, linestyle='-', marker='o', color=colors[0],linewidth =linewidth, markersize=2.)
+    colors = current_palette[0:2]
+    ax1.plot(x, y1, linestyle='-', marker='o', color=colors[0], linewidth=linewidth, markersize=2.)
     ax1.fill_between(x, y1 - dy, y1 + dy, color=colors[0], alpha=0.2)
     y2 = df_dense.mean()
     dy = df_dense.std()
-    ax1.plot(x, y2, linestyle='-', marker='o', color=colors[1],linewidth =linewidth, markersize=2.)
+    ax1.plot(x, y2, linestyle='-', marker='o', color=colors[1], linewidth=linewidth, markersize=2.)
     ax1.fill_between(x, y2 - dy, y2 + dy, color=colors[1], alpha=0.1)
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
     ax1.spines['bottom'].set_visible(False)
     ax1.spines['left'].set_visible(False)
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-
 
 
 def add_at_risk_counts_CUSTOM(*fitters, **kwargs):
@@ -167,10 +166,11 @@ def add_at_risk_counts_CUSTOM(*fitters, **kwargs):
 
     # Add a descriptive headline.
     ax2.xaxis.set_label_coords(0, 0.0)
-    ax2.set_xlabel('At risk', fontsize=fontsize+1)
+    ax2.set_xlabel('At risk', fontsize=fontsize + 1)
 
     # plt.tight_layout()
     return ax2
+
 
 def remove_ticks(ax, x=False, y=False):
     '''
@@ -214,5 +214,3 @@ def remove_spines(ax, sides):
     for side in sides:
         ax.spines[side].set_visible(False)
     return ax
-
-

@@ -1,11 +1,13 @@
-import pandas as pd
 from os.path import join
+
+import pandas as pd
 from matplotlib import pyplot as plt
+
 # chr	pos	type
 
-input_dir= '../../data/prostate/input/final/'
+input_dir = '../../data/prostate/input/final/'
 # output_dir= './processed'
-output_dir= '../../data/prostate/processed'
+output_dir = '../../data/prostate/processed'
 
 # filename = 'P1000_final_analysis_set.maf'
 filename = 'P1013_Clinical_Annotations_MAF.txt'
@@ -23,17 +25,17 @@ labels = labels.set_index('id')
 all = df.join(labels, how='inner')
 print all.head()
 
-mets = all [all['Primary_Met' ]== 'Metastasis']
+mets = all[all['Primary_Met'] == 'Metastasis']
 print mets['type'].value_counts()
 
-primary = all [all['Primary_Met' ]!= 'Metastasis']
+primary = all[all['Primary_Met'] != 'Metastasis']
 print primary['type'].value_counts()
 
 # primary['type'].value_counts().plot(kind ='bar')
-fig, ax = plt.subplots(figsize=(15,7))
+fig, ax = plt.subplots(figsize=(15, 7))
 # print pd.DataFrame(mets['type'].value_counts(), primary['type'].value_counts())
-print all.groupby(['Primary_Met','type']).count()['Tumor_Sample_Barcode'].unstack()
-all.groupby(['type','Primary_Met']).count()['Tumor_Sample_Barcode'].sort('').unstack().plot(kind='bar')
+print all.groupby(['Primary_Met', 'type']).count()['Tumor_Sample_Barcode'].unstack()
+all.groupby(['type', 'Primary_Met']).count()['Tumor_Sample_Barcode'].sort('').unstack().plot(kind='bar')
 
 # mets['type'].value_counts().plot(kind ='bar')
 plt.gcf().subplots_adjust(bottom=0.4)

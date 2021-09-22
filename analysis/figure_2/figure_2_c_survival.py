@@ -8,20 +8,23 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+
 from config_path import DATA_PATH, LOG_PATH
 from setup import saving_dir
 
 base_dir = DATA_PATH
+
+
 def plot_(primary):
-    percent = 100*primary/sum(primary)
-    labels= ['True prediction', 'False prediction']
-    xpos= [0,0.4]
-    width = [0.3,0.3]
+    percent = 100 * primary / sum(primary)
+    labels = ['True prediction', 'False prediction']
+    xpos = [0, 0.4]
+    width = [0.3, 0.3]
     fig, axes = plt.subplots(nrows=1, ncols=1, sharey=True)
     fig.set_size_inches(3, 5)
-    ax=axes
-    plt.bar(xpos,percent,  align='center', alpha=1.0, color=['black', 'red'], width=width)
-    plt.ylim([0,100])
+    ax = axes
+    plt.bar(xpos, percent, align='center', alpha=1.0, color=['black', 'red'], width=width)
+    plt.ylim([0, 100])
 
     ax.axis('off')
     ax.spines['top'].set_visible(False)
@@ -29,26 +32,27 @@ def plot_(primary):
     ax.spines['left'].set_visible(False)
 
     for i in ax.patches:
-        if i.get_height()>1.0:
-            ax.text(i.get_x() + 0.3*i.get_width(), i.get_height() + 5.0, '{:5.1f}%'.format(i.get_height()), fontsize=15,
+        if i.get_height() > 1.0:
+            ax.text(i.get_x() + 0.3 * i.get_width(), i.get_height() + 5.0, '{:5.1f}%'.format(i.get_height()),
+                    fontsize=15,
                     color='black', rotation=0)
 
 
-def get_predictions(filename, correct_prediction = True):
+def get_predictions(filename, correct_prediction=True):
     print filename
-    df  = pd.read_csv(filename, index_col= 0)
+    df = pd.read_csv(filename, index_col=0)
     if correct_prediction:
-        df.pred = df.pred_scores>=0.5
-    ind = (df.pred == 0)  & (df.y==0)
-    df_correct  = df[ind].copy()
-    ind = (df.pred == 1)  & (df.y==0)
-    df_wrong  = df[ind].copy()
+        df.pred = df.pred_scores >= 0.5
+    ind = (df.pred == 0) & (df.y == 0)
+    df_correct = df[ind].copy()
+    ind = (df.pred == 1) & (df.y == 0)
+    df_wrong = df[ind].copy()
     return df, df_correct, df_wrong
 
 
 def get_clinical():
-    filename = join( base_dir , 'prostate/supporting_data/prad_p1000_clinical_final.txt')
-    clinical_df  = pd.read_csv(filename, sep='\t')
+    filename = join(base_dir, 'prostate/supporting_data/prad_p1000_clinical_final.txt')
+    clinical_df = pd.read_csv(filename, sep='\t')
     return clinical_df
 
 
@@ -65,8 +69,8 @@ def plot_score_vs_pfs_time(filename, correct_prediction):
         # print data.head()
         data['PFS.time'] = data['PFS.time'] / 30
         linear_regressor = LinearRegression()
-        X= data['pred_scores'].values.reshape(-1, 1)
-        Y= data['PFS.time'].values.reshape(-1, 1)
+        X = data['pred_scores'].values.reshape(-1, 1)
+        Y = data['PFS.time'].values.reshape(-1, 1)
         linear_regressor.fit(X, Y)
         Y_pred = linear_regressor.predict(X)
         # sns.lmplot(x='pred_scores', y='PFS.time', data=dd_test, fit_reg=True, ci=None)
@@ -79,7 +83,7 @@ def plot_score_vs_pfs_time(filename, correct_prediction):
         # plt.legend(['Prediction score','PFS time'])
         plt.xlabel('Prediction score')
         plt.ylabel('PFS time')
-        maxx = 1.1*data['PFS.time'].max()
+        maxx = 1.1 * data['PFS.time'].max()
         plt.ylim((0, maxx))
         plt.title(label)
 
@@ -299,8 +303,6 @@ def move_spines(ax, sides, dists):
     return ax
 
 
-
-
 def plot_surv(ax, filename, correct_prediction):
     labels = ['Low Model Score', 'High Model Score']
     # labels = [ 'Correct prediction', 'Wrong prediction']
@@ -350,17 +352,18 @@ def plot_surv(ax, filename, correct_prediction):
     results = logrank_test(T1, T2, event_observed_A=E1, event_observed_B=E2)
     results.print_summary()
 
-
     ax.text(60, 0.4, "log-rank\np = %0.1g" % results.summary['p'], fontsize=10)
     ax.set_ylim((0, 1.05))
     ax.set_xlabel("Months", fontdict=dict(family='Arial', weight='bold', fontsize=14))
 
-    ax.set_ylabel("Prop. Survival", fontdict=dict(family='Arial',weight='bold', fontsize=14))
+    ax.set_ylabel("Prop. Survival", fontdict=dict(family='Arial', weight='bold', fontsize=14))
     ax.legend(prop={'size': 10})
     # ax.set_aspect(1.)
 
+
 filename = join(LOG_PATH, 'p1000/pnet/onsplit_average_reg_10_tanh_large_testing')
 ci_show = False
+
 
 def plot_surv_all(ax):
     correct_prediction = True
@@ -373,13 +376,9 @@ def run():
     plot_surv_all(ax)
     plt.subplots_adjust(bottom=0.15, left=0.25)
     # saving_filename = join(dirname(filename), 'BCR.png')
-    saving_filename = join(saving_dir,'survival.png')
+    saving_filename = join(saving_dir, 'survival.png')
     plt.savefig(saving_filename, dpi=200)
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
     run()
-    
-
-
-

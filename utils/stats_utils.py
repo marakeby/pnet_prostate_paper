@@ -1,16 +1,17 @@
 import numpy as np
 from scipy.stats import percentileofscore
 
-#https://github.com/mateuszbuda/ml-stat-util
+
+# https://github.com/mateuszbuda/ml-stat-util
 
 def score_ci(
-    y_true,
-    y_pred,
-    score_fun,
-    n_bootstraps=2000,
-    confidence_level=0.95,
-    seed=None,
-    reject_one_class_samples=True,
+        y_true,
+        y_pred,
+        score_fun,
+        n_bootstraps=2000,
+        confidence_level=0.95,
+        seed=None,
+        reject_one_class_samples=True,
 ):
     """
     Compute confidence interval for given score function based on labels and predictions using bootstrapping.
@@ -43,14 +44,14 @@ def score_ci(
 
 
 def score_stat_ci(
-    y_true,
-    y_preds,
-    score_fun,
-    stat_fun=np.mean,
-    n_bootstraps=2000,
-    confidence_level=0.95,
-    seed=None,
-    reject_one_class_samples=True,
+        y_true,
+        y_preds,
+        score_fun,
+        stat_fun=np.mean,
+        n_bootstraps=2000,
+        confidence_level=0.95,
+        seed=None,
+        reject_one_class_samples=True,
 ):
     """
     Compute confidence interval for given statistic of a score function based on labels and predictions using
@@ -93,14 +94,14 @@ def score_stat_ci(
 
 
 def pvalue(
-    y_true,
-    y_pred1,
-    y_pred2,
-    score_fun,
-    n_bootstraps=2000,
-    two_tailed=True,
-    seed=None,
-    reject_one_class_samples=True,
+        y_true,
+        y_pred1,
+        y_pred2,
+        score_fun,
+        n_bootstraps=2000,
+        two_tailed=True,
+        seed=None,
+        reject_one_class_samples=True,
 ):
     """
     Compute p-value for hypothesis that score function for model I predictions is higher than for model II predictions
@@ -133,15 +134,15 @@ def pvalue(
 
 
 def pvalue_stat(
-    y_true,
-    y_preds1,
-    y_preds2,
-    score_fun,
-    stat_fun=np.mean,
-    n_bootstraps=2000,
-    two_tailed=True,
-    seed=None,
-    reject_one_class_samples=True,
+        y_true,
+        y_preds1,
+        y_preds2,
+        score_fun,
+        stat_fun=np.mean,
+        n_bootstraps=2000,
+        two_tailed=True,
+        seed=None,
+        reject_one_class_samples=True,
 ):
     """
     Compute p-value for hypothesis that given statistic of score function for model I predictions is higher than for
@@ -170,8 +171,8 @@ def pvalue_stat(
 
     np.random.seed(seed)
     z = []
-    scores1=[]
-    scores2=[]
+    scores1 = []
+    scores2 = []
     for i in range(n_bootstraps):
         readers1 = np.random.randint(0, len(y_preds1), len(y_preds1))
         readers2 = np.random.randint(0, len(y_preds2), len(y_preds2))

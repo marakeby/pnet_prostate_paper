@@ -91,8 +91,6 @@ class Model(BaseEstimator):
         pid = os.getpid()
         timeStamp = '_{0:%b}-{0:%d}_{0:%H}-{0:%M}-{0:%S}'.format(datetime.datetime.now())
         self.debug_folder = DebugFolder().get_debug_folder()
-        # self.save_filename = './temp/' + sk_params['fitting_params']['save_name'] + str(pid) + timeStamp
-        # self.save_filename = self.debug_folder + sk_params['fitting_params']['save_name'] + str(pid) + timeStamp
         self.save_filename = os.path.join(self.debug_folder,
                                           sk_params['fitting_params']['save_name'] + str(pid) + timeStamp)
         self.shuffle = sk_params['fitting_params']['shuffle']
@@ -112,7 +110,6 @@ class Model(BaseEstimator):
         if 'class_weight' in sk_params['fitting_params']:
             self.class_weight = sk_params['fitting_params']['class_weight']
             logging.info('class_weight {}'.format(self.class_weight))
-        # print 'self.n_outputs {}'.format(self.n_outputs)
 
     def get_params(self, deep=False):
         return self.params
@@ -247,24 +244,10 @@ class Model(BaseEstimator):
         pred_validate_score = self.get_prediction_score(X_train)
         if self.n_outputs > 1:
             y_train = y_train[0]
-        # self.th = self.get_th(y_val, pred_validate_score)
 
         if self.max_f1:
             self.th = self.get_th(y_train, pred_validate_score)
             logging.info('prediction threshold {}'.format(self.th))
-
-        # #TODO: check this part
-        # if self.debug and self.save_gradient:
-        #     filepath = self.save_filename + "Training-{epoch:02d}.hdf5"
-        #     saving_callback = ModelCheckpoint(filepath, monitor=self.monitor, verbose=1, save_best_only=False,
-        #                                   mode='max')
-        #     filepath = self.save_filename
-        #     saving_gradient = GradientCheckpoint(filepath, self.feature_importance, X_train, y_train,self.nb_epoch, self.feature_names, period =self.period)
-        #     # saving_gradient = ActivationsCheckpoint(filepath, get_gradient_weights, X_train, y_train, self.feature_names)
-        #     callbacks.append(saving_gradient)
-        #     # saving_callback=[saving_gradient]
-        # else:
-        #     saving_callback=[]
 
         if hasattr(self, 'feature_importance'):
             self.coef_ = self.get_coef_importance(X_train, y_train, target=-1,
@@ -278,19 +261,11 @@ class Model(BaseEstimator):
         return coef_
 
     def predict(self, X_test):
-        # print 'start predicting RNN2'
         if self.select_best_model:
             logging.info("loading model %s" % self.save_filename)
             self.model.load_weights(self.save_filename)
 
-        # prediction_scores = self.model.predict(X_test)
         prediction_scores = self.get_prediction_score(X_test)
-        # prediction_scores = self.model.predict(X_test)
-        # if (type(prediction_scores) ==list) and (self.prediction_output=='average'):
-        #     prediction_scores= np.mean(np.array(prediction_scores), axis = 0)
-        # else:
-        #     prediction_scores= prediction_scores[-1]
-        # prediction_scores= prediction_scores
 
         std_th = .5
         if hasattr(self, 'th'):
@@ -348,13 +323,9 @@ class Model(BaseEstimator):
         layer_names = []
         for l in layers:
             layer_names.append(l.name)
-        # outputs = [layer.output for layer in layers]  # all layer outputs
         outputs = [layer.get_output_at(0) for layer in layers]  # all layer outputs
-        # functors = [K.function([inp] + [K.learning_phase()], [out]) for out in outputs]  # evaluation functions
-        # functors = [K.function([inp] + [K.learning_phase()], [out]) for out in outputs]  # evaluation functions
         functor = K.function(inputs=[inp, K.learning_phase()], outputs=outputs)  # evaluation function
         layer_outs = functor([X, 0.])
-        # layer_outs = [func([X, 1.]) for func in functors]
         ret = dict(zip(layer_names, layer_outs))
         return ret
 
@@ -394,13 +365,9 @@ class Model(BaseEstimator):
         coef_dfs = {}
         common_keys = set(coef.keys()).intersection(self.feature_names.keys())
         for k in common_keys:
-            c= coef[k]
+            c = coef[k]
             names = self.feature_names[k]
-        # for c, names in zip(coef, self.feature_names):
-            # print (c)
-            # print (len(names))
             df = pd.DataFrame(c.ravel(), index=names, columns=['coef'])
-            # coef_dfs.append(df)
             coef_dfs[k] = df
         return coef_dfs
 

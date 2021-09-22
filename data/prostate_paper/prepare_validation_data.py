@@ -1,9 +1,7 @@
 import os
-import ssl
-from os.path import join, basename, dirname, expanduser, exists
 import pandas as pd
-import urllib2
 from config_path import GENE_PATH
+from os.path import join, dirname, exists
 current_dir = dirname(__file__)
 
 processed_dir = 'processed'
@@ -12,28 +10,27 @@ data_dir = 'external_validation'
 processed_dir = join(current_dir, processed_dir)
 data_dir = join(current_dir, data_dir)
 
-
 if not exists(data_dir):
     os.makedirs(data_dir)
 
-
-
 inputs_dir = join(data_dir, 'Met500')
 
-def get_design_matrix_mutation(saving_dir):
 
+def get_design_matrix_mutation(saving_dir):
     filenmae = 'somatic_v4.csv'
-    df = pd.read_csv(join(saving_dir, filenmae), sep= ',')
-    design_matrix  = pd.pivot_table(data=df, values='Effect', index='Pipeline_ID', columns='Gene',
-                                    aggfunc='count', fill_value=None)
+    df = pd.read_csv(join(saving_dir, filenmae), sep=',')
+    design_matrix = pd.pivot_table(data=df, values='Effect', index='Pipeline_ID', columns='Gene',
+                                   aggfunc='count', fill_value=None)
     return design_matrix
 
+
 def get_protein_encoding_genes():
-    df_protein = pd.read_csv(join(GENE_PATH,'HUGO_genes/protein-coding_gene_with_coordinate_minimal.txt'), sep='\t', index_col=0) #16190
-    df_protein.columns=['start', 'end', 'symbol']
-    df= df_protein
-    df_other = pd.read_csv(join(GENE_PATH,'HUGO_genes/other.txt'), sep='\t') # 112
-    genes = set(list(df_other['symbol'] )+ list(df['symbol']))
+    df_protein = pd.read_csv(join(GENE_PATH, 'HUGO_genes/protein-coding_gene_with_coordinate_minimal.txt'), sep='\t',
+                             index_col=0)  # 16190
+    df_protein.columns = ['start', 'end', 'symbol']
+    df = df_protein
+    df_other = pd.read_csv(join(GENE_PATH, 'HUGO_genes/other.txt'), sep='\t')  # 112
+    genes = set(list(df_other['symbol']) + list(df['symbol']))
     return genes
 
 
@@ -45,24 +42,28 @@ def prepare_Met500_mut():
     protein_genes = get_protein_encoding_genes()
     print 'protein_genes', len(protein_genes)
     mut = get_design_matrix_mutation(saving_dir)
-    genes= set( mut.columns.values)
+    genes = set(mut.columns.values)
     common_genes = protein_genes.intersection(genes)
-    print 'number of genes {}, number of common genes {} '.format( len(genes),len(common_genes))
+    print 'number of genes {}, number of common genes {} '.format(len(genes), len(common_genes))
 
-    #saving mutation matrix
+    # saving mutation matrix
     mut.to_csv(join(saving_dir, 'Met500_mut_matrix.csv'))
+
 
 def prepare_Met500_cnv():
     # processing CNV data
     saving_dir = join(data_dir, 'Met500')
     protein_genes = get_protein_encoding_genes()
     # cnv_genes= pd.read_csv(join(data_dir,'met500_cnv_unique_genes.txt'), header=None)
-    cnv_genes= pd.read_csv(join(saving_dir,'Met500_cnv.txt'), header=0, index_col=0, sep='\t')
+    cnv_genes = pd.read_csv(join(saving_dir, 'Met500_cnv.txt'), header=0, index_col=0, sep='\t')
     # cnv_genes.columns = ['genes']
     print cnv_genes.head()
-    genes= set(cnv_genes.index)
+    genes = set(cnv_genes.index)
     common_genes = protein_genes.intersection(genes)
-    print 'number of cnv genes {} number of encoding genes {} number of comon genes {} '.format( len(genes), len(protein_genes),len(common_genes))
+    print 'number of cnv genes {} number of encoding genes {} number of comon genes {} '.format(len(genes),
+                                                                                                len(protein_genes),
+                                                                                                len(common_genes))
+
 
 def prepare_PRAD():
     saving_dir = join(data_dir, 'PRAD')
@@ -92,9 +93,9 @@ def prepare_PRAD():
     xx = cpcg_mutations.groupby('Gene').sum()
     xx.T.to_csv(join(saving_dir, 'mut_matrix.csv'))
 
-    #cnv
+    # cnv
     extract_dir = join(saving_dir, 'nature20788-s2')
-    cnv_filename = join(extract_dir,'Supplementary Table 02 - Per-gene CNA analyses.xlsx')
+    cnv_filename = join(extract_dir, 'Supplementary Table 02 - Per-gene CNA analyses.xlsx')
     cna_df = pd.read_excel(join(saving_dir, cnv_filename))
     cna_df_matrix = cna_df.loc[:, ['Symbol'] + CPCG_cols]
     yy = cna_df_matrix.groupby('Symbol').max()

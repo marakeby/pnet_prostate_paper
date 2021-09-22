@@ -3,7 +3,6 @@ from copy import deepcopy
 from model.builders.prostate_models import build_pnet2
 
 task = 'classification_binary'
-# selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes.csv'
 selected_genes = 'tcga_prostate_expressed_genes_and_cancer_genes_and_memebr_of_reactome.csv'
 data_base = {'id': 'ALL', 'type': 'prostate_paper',
              'params': {
@@ -52,24 +51,24 @@ nn_pathway = {
             },
             'fitting_params':
                 dict(samples_per_epoch=10,
-                                      select_best_model=False,
-                                      monitor='val_o6_f1',
-                                      verbose=2,
-                                      epoch=300,
-                                      shuffle=True,
-                                      batch_size=50,
-                                      save_name='pnet',
-                                      debug=False,
-                                      save_gradient=False,
-                                      class_weight='auto',
-                                      n_outputs=n_hidden_layers + 1,
-                                      prediction_output='average',
-                                      early_stop=False,
-                                      reduce_lr=False,
-                                      reduce_lr_after_nepochs=dict(drop=0.25, epochs_drop=50),
-                                      lr=0.001,
-                                      max_f1=True
-                                      ),
+                     select_best_model=False,
+                     monitor='val_o6_f1',
+                     verbose=2,
+                     epoch=300,
+                     shuffle=True,
+                     batch_size=50,
+                     save_name='pnet',
+                     debug=False,
+                     save_gradient=False,
+                     class_weight='auto',
+                     n_outputs=n_hidden_layers + 1,
+                     prediction_output='average',
+                     early_stop=False,
+                     reduce_lr=False,
+                     reduce_lr_after_nepochs=dict(drop=0.25, epochs_drop=50),
+                     lr=0.001,
+                     max_f1=True
+                     ),
             'feature_importance': 'deepexplain_deeplift'
         },
 }
@@ -81,11 +80,4 @@ nn_pathway_fixed_lr['params']['fitting_params']['save_name'] = 'pnet_fixed_lr'
 nn_pathway_fixed_lr['params']['fitting_params'].pop('reduce_lr_after_nepochs')
 models = [nn_pathway, nn_pathway_fixed_lr]
 
-
-# class_weight = {0: 0.75, 1: 1.5}
-# logistic = {'type': 'sgd', 'id': 'Logistic Regression',
-#             'params': {'loss': 'log', 'penalty': 'l2', 'alpha': 0.01, 'class_weight': class_weight}}
-# models.append(logistic)
-
 pipeline = {'type': 'one_split', 'params': {'save_train': True, 'eval_dataset': 'test'}}
-from sklearn.datasets import load_iris

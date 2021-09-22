@@ -1,6 +1,5 @@
 import itertools
 from os.path import join
-
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn import metrics
@@ -12,10 +11,10 @@ def plot_auc_bootstrap(all_models_dict, ax):
     import seaborn as sns
     colors = sns.color_palette(None, n)
 
-    all_scores=[]
-    names=[]
-    xs=[]
-    avg_scores=[]
+    all_scores = []
+    names = []
+    xs = []
+    avg_scores = []
     for i, k in enumerate(all_models_dict.keys()):
         df = all_models_dict[k]
         y_test = df['y']
@@ -28,14 +27,13 @@ def plot_auc_bootstrap(all_models_dict, ax):
         avg_scores.append(score)
 
     all_scores = [x for _, x in sorted(zip(avg_scores, all_scores))]
-    names = [x for _, x in sorted(zip(avg_scores, names ))]
+    names = [x for _, x in sorted(zip(avg_scores, names))]
 
-    ax.boxplot(all_scores, labels= names)
+    ax.boxplot(all_scores, labels=names)
     ngroup = len(all_scores)
     clevels = np.linspace(0., 1., ngroup)
-    from matplotlib import cm
     for i, (x, val, clevel) in enumerate(zip(xs, all_scores, clevels)):
-        plt.scatter(x, val,marker='.', color=colors[i], alpha=0.1)
+        plt.scatter(x, val, marker='.', color=colors[i], alpha=0.1)
 
 
 def plot_roc(fig, y_test, y_pred_score, save_dir, label=''):
@@ -43,8 +41,6 @@ def plot_roc(fig, y_test, y_pred_score, save_dir, label=''):
     roc_auc = metrics.auc(fpr, tpr)
     plt.figure(fig.number)
     plt.plot(fpr, tpr, label=label + ' (area = %0.2f)' % roc_auc)
-
-    # plt.plot(fpr, tpr)
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -60,8 +56,6 @@ def plot_prc(fig, y_test, y_pred_score, save_dir, label=''):
     plt.figure(fig.number)
     plt.plot(recall, precision, label=label + ' (area under precision recall curve = %0.2f)' % roc_auc)
 
-    # plt.plot(fpr, tpr)
-    # plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('Recall', fontsize=12)
@@ -75,7 +69,6 @@ def generate_plots(test_scores, saving_dir):
         plt.figure()
         print c
         ax = test_scores[c].plot(kind='bar', )
-        # ax.set_xlabel("Models", fontsize=12)
         ax.set_ylabel(c, fontsize=12)
         plt.ylim([0.0, 1.05])
         plt.tight_layout()
@@ -87,7 +80,6 @@ def generate_plots(test_scores, saving_dir):
 def plot_box_plot(df, save_dir):
     # df = pd.concat(list_model_scores, axis=1, keys=model_names)
     df.columns = df.columns.swaplevel(0, 1)
-
     for c in df.columns.levels[0]:
         plt.figure()
         dd = df[c]
@@ -97,13 +89,7 @@ def plot_box_plot(df, save_dir):
         ax.set_ylabel(str(c), fontsize=12)
         plt.tight_layout()
         plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
-        # ax.get_xaxis().set_minor_locator(ticker.AutoMinorLocator())
-        # ax.get_yaxis().set_minor_locator(ticker.AutoMinorLocator())
-
-        # ax.grid(b=True, which='major', color='w', linewidth=1.5)
-        # ax.grid(b=True, which='minor', color='w', linewidth=0.75)
         plt.gcf().subplots_adjust(bottom=0.25)
-
         plt.savefig(join(save_dir, c + '_boxplot'))
 
     pass
@@ -145,7 +131,6 @@ def plot_confusion_matrix(cm, classes,
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     plt.gcf().subplots_adjust(bottom=0.25)
-    # plt.savefig(join(save_dir, c + '_boxplot'))
 
 
 def save_confusion_matrix(cnf_matrix, base_dir, model):

@@ -1,7 +1,9 @@
 import os
 from copy import deepcopy
 from os.path import dirname
+
 import numpy as np
+
 from model.builders.prostate_models import build_pnet2
 
 base_dirname = dirname(dirname(__file__))
@@ -32,14 +34,9 @@ for n in splits:
     data.append(d)
 
 n_hidden_layers = 5
-# base_reg = 0.01
 base_dropout = 0.5
-# wregs= [float(base_reg)/float(i) for i in range(1,n_hidden_layers+1)]
 wregs = [0.001] * 7
-# loss_weights = range(3,9)
 loss_weights = [2, 7, 20, 54, 148, 400]
-# loss_weights = [2, 7, 20, 54, 100, 100]
-# wreg_outcomes = [0.01]*6
 wreg_outcomes = [0.01] * 6
 pre = {'type': None}
 
@@ -77,7 +74,6 @@ nn_pathway = {
                                       save_gradient=False,
                                       class_weight='auto',
                                       n_outputs=n_hidden_layers + 1,
-                                      # prediction_output='final',
                                       prediction_output='average',
                                       early_stop=False,
                                       reduce_lr=False,

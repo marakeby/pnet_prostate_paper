@@ -1,6 +1,10 @@
-import pandas as pd
-from config_path import *
 from os.path import join
+
+import pandas as pd
+
+from config_path import *
+
+
 def get_reactome_pathway_names():
     '''
     :return: dataframe of pathway ids and names
@@ -12,7 +16,6 @@ def get_reactome_pathway_names():
     reactome_pathways_df_human = reactome_pathways_df[reactome_pathways_df['species'] == 'Homo sapiens']
     reactome_pathways_df_human.reset_index(inplace=True)
     return reactome_pathways_df_human
-
 
 
 def get_x_y(df_encoded, layers_nodes):
@@ -29,29 +32,29 @@ def get_x_y(df_encoded, layers_nodes):
     target_weights = df_encoded.groupby(by='target')['value'].sum()
 
     node_weights = pd.concat([source_weights, target_weights])
-    node_weights =  node_weights.to_frame()
-    node_weights =  node_weights.groupby(node_weights.index).max()
+    node_weights = node_weights.to_frame()
+    node_weights = node_weights.groupby(node_weights.index).max()
     print layers_nodes
     print node_weights
 
     # print node_weights
     node_weights = node_weights.join(layers_nodes)
-    node_weights.sort_values(by=['layer', 'value'],ascending =False, inplace=True)
-    n_layers = layers_nodes['layer'].max()+1
-    node_weights['x']= node_weights['layer']/n_layers
+    node_weights.sort_values(by=['layer', 'value'], ascending=False, inplace=True)
+    n_layers = layers_nodes['layer'].max() + 1
+    node_weights['x'] = node_weights['layer'] / n_layers
     print node_weights
 
-    node_weights['layer_weight'] =node_weights.groupby('layer')['value'].transform(pd.Series.sum)
-    node_weights['y'] =node_weights.groupby('layer')['value'].transform(pd.Series.cumsum)
+    node_weights['layer_weight'] = node_weights.groupby('layer')['value'].transform(pd.Series.sum)
+    node_weights['y'] = node_weights.groupby('layer')['value'].transform(pd.Series.cumsum)
 
-    node_weights['y'] = (node_weights['y']-node_weights['value']/2)/node_weights['layer_weight'] +0.05
+    node_weights['y'] = (node_weights['y'] - node_weights['value'] / 2) / node_weights['layer_weight'] + 0.05
 
     print node_weights
     node_weights.sort_index(inplace=True)
     return node_weights['x'], node_weights['y']
 
 
-def get_data_trace(encoded_top_genes, all_node_labels,layers, node_colors= None):
+def get_data_trace(encoded_top_genes, all_node_labels, layers, node_colors=None):
     x, y = get_x_y(encoded_top_genes, layers)
     data_trace = dict(
         type='sankey',
@@ -80,7 +83,7 @@ def get_data_trace(encoded_top_genes, all_node_labels,layers, node_colors= None)
             source=encoded_top_genes['source'],
             target=encoded_top_genes['target'],
             value=encoded_top_genes['value'],
-                # color=encoded_top_genes['color']
+            # color=encoded_top_genes['color']
 
         )
     )
@@ -90,9 +93,9 @@ def get_data_trace(encoded_top_genes, all_node_labels,layers, node_colors= None)
         height=800,
         width=1400,
         font=dict(family="Arial", size=20
-            # size=16,
-            # type='bold'
-        )
+                  # size=16,
+                  # type='bold'
+                  )
         # updatemenus=[dict(
         #     y=0.6,
         #     buttons=[

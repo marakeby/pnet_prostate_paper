@@ -1,8 +1,10 @@
-import pandas as pd
-import numpy as np
 from os.path import join
-from model.model_utils import get_coef_importance
+
+import numpy as np
+import pandas as pd
+
 from config_path import REACTOM_PATHWAY_PATH
+from model.model_utils import get_coef_importance
 
 
 def get_data(loader, use_data, dropAR):
@@ -45,9 +47,10 @@ def get_data(loader, use_data, dropAR):
     print X.shape, Y.shape, len(info)
     return X, Y, info
 
+
 # returns a dataframe of pathway ids and names
 def get_reactome_pathway_names():
-    reactome_pathways_df = pd.read_csv(join(REACTOM_PATHWAY_PATH,'ReactomePathways.txt'), sep='	',header=None)
+    reactome_pathways_df = pd.read_csv(join(REACTOM_PATHWAY_PATH, 'ReactomePathways.txt'), sep='	', header=None)
     reactome_pathways_df.columns = ['id', 'name', 'species']
     reactome_pathways_df_human = reactome_pathways_df[reactome_pathways_df['species'] == 'Homo sapiens']
     reactome_pathways_df_human.reset_index(inplace=True)
@@ -118,8 +121,10 @@ def get_node_importance(nn_model, x_train, y_train, importance_type, target):
         node_weights_samples_dfs[k] = (df_samples)
     return node_weights_dfs, node_weights_samples_dfs
 
+
 from model.layers_custom import SparseTF
 from scipy.sparse import csr_matrix
+
 
 def get_link_weights_df(link_weights, features):
     link_weights_df = []
@@ -136,6 +141,7 @@ def get_link_weights_df(link_weights, features):
 
     return link_weights_df
 
+
 def get_layer_weights(layer):
     w = layer.get_weights()[0]
     if type(layer) == SparseTF:
@@ -145,8 +151,9 @@ def get_layer_weights(layer):
         w = w.todense()
     return w
 
+
 def get_link_weights_df_(model, features, layer_names):
-    #first layer
+    # first layer
     # layer_name= layer_names[1]
     # layer= model.get_layer(layer_name)
     link_weights_df = {}
@@ -155,20 +162,20 @@ def get_link_weights_df_(model, features, layer_names):
 
     for i, layer_name in enumerate(layer_names[1:]):
         layer = model.get_layer(layer_name)
-        w= get_layer_weights(layer)
+        w = get_layer_weights(layer)
         layer_ind = layer_names.index(layer_name)
-        previous_layer_name = layer_names[layer_ind-1]
+        previous_layer_name = layer_names[layer_ind - 1]
 
         print  i, previous_layer_name, layer_name
-        if i ==0 or i==(len(layer_names)-2):
-            cols=['root']
+        if i == 0 or i == (len(layer_names) - 2):
+            cols = ['root']
         else:
             cols = features[layer_name]
         rows = features[previous_layer_name]
         w_df = pd.DataFrame(w, index=rows, columns=cols)
         link_weights_df[layer_name] = w_df
 
-    #last layer
+    # last layer
     # layer_name = layer_names[-1]
     # layer = model.get_layer(layer_name)
     # link_weights_df = {}
@@ -177,43 +184,44 @@ def get_link_weights_df_(model, features, layer_names):
 
     return link_weights_df
 
+
 def get_link_weights(model):
     layers = model.layers
     n = len(layers)
     hidden_layers_weights = []
-    next=0
+    next = 0
     for i, l in enumerate(layers):
-#         print i, n, l.name
-#         if l.name.startswith('h') or l.name =='o_linear7':
-        if l.name.startswith('h') or l.name =='o_linear6':
+        #         print i, n, l.name
+        #         if l.name.startswith('h') or l.name =='o_linear7':
+        if l.name.startswith('h') or l.name == 'o_linear6':
             w = l.get_weights()[0]
             if type(l) == SparseTF:
-#                 print l.nonzero_ind
-                row_ind = l.nonzero_ind[:,0]
-                col_ind= l.nonzero_ind[:,1]
-                w = csr_matrix((w, (row_ind, col_ind) ), shape = l.kernel_shape)
-                w=w.todense()
+                #                 print l.nonzero_ind
+                row_ind = l.nonzero_ind[:, 0]
+                col_ind = l.nonzero_ind[:, 1]
+                w = csr_matrix((w, (row_ind, col_ind)), shape=l.kernel_shape)
+                w = w.todense()
             hidden_layers_weights.append(w)
             print l.name, len(l.get_weights()), w.shape
     return hidden_layers_weights
 
 
 ## Adjust importance
-#------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 def adjust_layer(df):
-    #graph coef
+    # graph coef
     z1 = df.coef_graph
-    z1= (z1 - z1.mean())/z1.std(ddof=0)
+    z1 = (z1 - z1.mean()) / z1.std(ddof=0)
 
     # gradient coef
     z2 = df.coef
-    z2= (z2 - z2.mean())/z2.std(ddof=0)
+    z2 = (z2 - z2.mean()) / z2.std(ddof=0)
 
-    z=z2-z1
+    z = z2 - z1
 
-    z = (z-z.mean())/z.std(ddof=0)
+    z = (z - z.mean()) / z.std(ddof=0)
     x = np.arange(len(z))
-    df['coef_combined2']=z
+    df['coef_combined2'] = z
     return df
 
 
@@ -224,7 +232,7 @@ def get_degrees(maps, layers):
         layer1 = maps[l1]
         layer2 = maps[l2]
 
-        layer1[layer1!=0] =1.
+        layer1[layer1 != 0] = 1.
         layer2[layer2 != 0] = 1.
 
         fan_out1 = layer1.abs().sum(axis=1)
@@ -249,13 +257,14 @@ def get_degrees(maps, layers):
 
     return stats
 
+
 def adjust_coef_with_graph_degree(node_importance_dfs, stats, layer_names, saving_dir):
     ret = []
     # for i, (grad, graph) in enumerate(zip(node_importance_dfs, degrees)):
     for i, l in enumerate(layer_names):
         print l
-        grad=node_importance_dfs[l]
-        graph=stats[l]['degree'].to_frame(name='coef_graph')
+        grad = node_importance_dfs[l]
+        graph = stats[l]['degree'].to_frame(name='coef_graph')
 
         graph.index = get_pathway_names(graph.index)
         grad.index = get_pathway_names(grad.index)
@@ -268,26 +277,27 @@ def adjust_coef_with_graph_degree(node_importance_dfs, stats, layer_names, savin
         divide[~ind] = divide[~ind] = 1.
         d['coef_combined'] = d.coef / divide
         z = d.coef_combined
-        z= (z - z.mean())/z.std(ddof=0)
-        d['coef_combined_zscore']=z
+        z = (z - z.mean()) / z.std(ddof=0)
+        d['coef_combined_zscore'] = z
         d = adjust_layer(d)
         #         d['coef_combined'] = d['coef_combined']/sum(d['coef_combined'])
         filename = join(saving_dir, 'layer_{}_graph_adjusted.csv'.format(i))
         d.to_csv(filename)
-        d['layer'] = i+1
+        d['layer'] = i + 1
         ret.append(d)
     node_importance = pd.concat(ret)
     node_importance = node_importance.groupby(node_importance.index).min()
     return node_importance
 
 
-#get important connections
-#-------------------------------------
+# get important connections
+# -------------------------------------
 def get_nlargeest_ind(S, sigma=2.):
     # ind_source = (S - S.median()).abs() > 3. * S.std()
     ind_source = (S - S.median()).abs() > sigma * S.std()
     ret = int(sum(ind_source))
     return ret
+
 
 def get_connections(maps, layer_names):
     layers = []
@@ -296,7 +306,7 @@ def get_connections(maps, layer_names):
         # layer = layer.unstack().reset_index(name='value')
         layer = layer.unstack().reset_index()
         layer = layer[layer.value != 0]
-        layer['layer'] = i+1
+        layer['layer'] = i + 1
         print layer.head()
         layers.append(layer)
     conn = pd.concat(layers)
@@ -306,6 +316,7 @@ def get_connections(maps, layer_names):
     conn.columns = ['target', 'source', 'value', 'layer']
     conn.head()
     return conn
+
 
 def get_high_nodes(node_importance, sigma=2):
     node_importance_layers = []
@@ -322,19 +333,20 @@ def get_high_nodes(node_importance, sigma=2):
     high_nodes = pd.concat([root, high_nodes])
     return high_nodes
 
+
 def filter_connections(df, high_nodes, add_unk=False):
     def apply_others(row):
         # print row
         if not row['source'] in high_nodes_list:
-            row['source']='others' + str(row['layer'])
+            row['source'] = 'others' + str(row['layer'])
 
         if not row['target'] in high_nodes_list:
-            row['target']='others'+ str(row['layer'] +1)
+            row['target'] = 'others' + str(row['layer'] + 1)
         return row
 
     layers_id = np.sort(df.layer.unique())
     high_nodes_list = high_nodes.index.levels[1]
-    layer_dfs= []
+    layer_dfs = []
     for i, l in enumerate(layers_id):
         layer_df = df[df.layer == l].copy()
         ind1 = layer_df.source.isin(high_nodes_list)

@@ -1,24 +1,26 @@
-from config_path import DATA_PATH, LOG_PATH, PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
-from matplotlib import pyplot as plt, gridspec
-from os.path import join, dirname, realpath, exists
-import numpy as np
-from os import makedirs
-from config_path import DATA_PATH, LOG_PATH, PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
-from matplotlib import pyplot as plt, ticker
-import seaborn as sns
-import pandas as pd
-import itertools
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from sklearn.metrics import confusion_matrix, average_precision_score
-from sklearn import metrics
+from matplotlib import gridspec
 import collections
+import itertools
+from os import makedirs
+from os.path import join, exists
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import gridspec
+from matplotlib import pyplot as plt, ticker
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix, average_precision_score
+
+from config_path import PROSTATE_LOG_PATH, PLOTS_PATH
 
 
 def plot_box_plot(df, axis):
     df.columns = df.columns.swaplevel(0, 1)
     metrics = df.columns.levels[0]
     print 'metrics', metrics
-    for i , c in enumerate(metrics):
+    for i, c in enumerate(metrics):
         dd = df[c].copy()
         dd.columns = [mapping_dict_cols[a] for a in dd.columns]
         avg = dd['P-NET'].median()
@@ -26,10 +28,11 @@ def plot_box_plot(df, axis):
         order = list(dd.median().sort_values().index)
         dd = dd.melt()
         # ax = sns.boxplot(ax=axis[i], x="variable", y="value", data=dd, whis=np.inf, order=order, palette=my_pal, linewidth=1)
-        flierprops = dict(marker='o', markersize=1, alpha =0.7)
+        flierprops = dict(marker='o', markersize=1, alpha=0.7)
 
-        ax = sns.boxplot(ax=axis[i], x="variable", y="value", data=dd, whis=1.5, order=order, palette=my_pal, linewidth=1, flierprops=flierprops)
-        ax.axhline(avg, ls='--',  linewidth=1)
+        ax = sns.boxplot(ax=axis[i], x="variable", y="value", data=dd, whis=1.5, order=order, palette=my_pal,
+                         linewidth=1, flierprops=flierprops)
+        ax.axhline(avg, ls='--', linewidth=1)
         ax.set_ylim([0.4, 1.05])
         ax.set_ylabel(mapping_dict[c], fontproperties)
         ax.set_xlabel('')
@@ -44,7 +47,6 @@ def plot_box_plot(df, axis):
 
 
 def plot_confusion_matrix_all(ax, adjust_threshold=False):
-
     def plot_confusion_matrix(ax, cm, classes, labels=None,
                               normalize=False,
                               # title='Confusion matrix',
@@ -121,12 +123,11 @@ def plot_auc_all(ax):
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_score, pos_label=1)
         roc_auc = metrics.auc(fpr, tpr)
         ax.plot(fpr, tpr, label=label + ' (%0.2f)' % roc_auc, linewidth=1, color=color)
-        ax.plot([0, 1], [0, 1], 'k--', alpha=0.1,linewidth=1)
+        ax.plot([0, 1], [0, 1], 'k--', alpha=0.1, linewidth=1)
         ax.set_xlim([0.0, 1.0])
         ax.set_ylim([0.0, 1.05])
         ax.set_xlabel('False Positive Rate', fontproperties)
         ax.set_ylabel('True Positive Rate', fontproperties)
-
 
     def get_prc_data():
         all_models_dict = {}
@@ -182,7 +183,7 @@ def plot_auc_all(ax):
     ax.spines['right'].set_visible(False)
     # ax.spines['bottom'].set_visible(False)
 
-    ax.legend(loc="lower right", bbox_to_anchor=(1.2,0.0), fontsize=fontsize, framealpha=0.0)
+    ax.legend(loc="lower right", bbox_to_anchor=(1.2, 0.0), fontsize=fontsize, framealpha=0.0)
 
     for tick in ax.xaxis.get_major_ticks():
         tick.label.set_fontsize(fontsize)
@@ -196,10 +197,9 @@ def plot_auc_all(ax):
     # ax.spines['left'].set_visible(False)
 
 
-
 def plot_crossvalidation_metrics(axis):
     df = pd.read_csv(join(models_base_dir, 'folds.csv'), sep=',', index_col=0, header=[0, 1])
-    pnet_base_dir = join(base_dir , 'pnet/crossvalidation_average_reg_10_tanh')
+    pnet_base_dir = join(base_dir, 'pnet/crossvalidation_average_reg_10_tanh')
     pnet_df = pd.read_csv(join(pnet_base_dir, 'folds.csv'), sep=',', index_col=0, header=[0, 1])
     df = pd.concat([pnet_df, df], axis=1)
     df = df.drop('dense_data_0', axis=1, level=0)
@@ -208,7 +208,8 @@ def plot_crossvalidation_metrics(axis):
     sns.set_style(None)
 
 
-mapping_dict = {'accuracy': 'Accuracy', 'auc': 'Area Under Curve (AUC)', 'aupr': 'AUPRC', 'f1': 'F1', 'precision': 'Precision', 'percision': 'Precision', 'recall': 'Recall'}
+mapping_dict = {'accuracy': 'Accuracy', 'auc': 'Area Under Curve (AUC)', 'aupr': 'AUPRC', 'f1': 'F1',
+                'precision': 'Precision', 'percision': 'Precision', 'recall': 'Recall'}
 
 base_dir = PROSTATE_LOG_PATH
 models_base_dir = join(base_dir, 'compare/crossvalidation_ML_test')
@@ -226,7 +227,7 @@ mapping_dict_cols = {'Adaptive Boosting_data_0': 'Ada. Boosting',
                      }
 current_palette = sns.color_palette(None, len(models))
 
-fontsize = 5 # legends, axis
+fontsize = 5  # legends, axis
 fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
 
 my_pal = {}
@@ -271,6 +272,7 @@ def run():
     plt.savefig(saving_filename, dpi=300)
     # saving_filename = join(saving_dir, 'figure_ed2.pdf')
     # plt.savefig(saving_filename)
+
 
 if __name__ == "__main__":
     run()

@@ -1,13 +1,15 @@
-import pandas as pd
-from matplotlib import pyplot as plt, gridspec
+from os import makedirs
+from os.path import join, exists
+
 import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt, gridspec
 from matplotlib.ticker import FormatStrFormatter, NullFormatter
 from scipy import stats
-from config_path import PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
-from os.path import join, exists
-from os import makedirs
-import seaborn as sns
 from sklearn import metrics
+
+from config_path import PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
 
 
 def get_dense_sameweights(col='f1'):
@@ -38,11 +40,11 @@ def plot_compaison(ax1, label, df_pnet, df_dense):
     sns.set_color_codes('muted')
     current_palette = sns.color_palette()
     colors = current_palette[0:2]
-    ax1.plot(x, y1, linestyle='-', marker='o', color=colors[0], linewidth =1.)
+    ax1.plot(x, y1, linestyle='-', marker='o', color=colors[0], linewidth=1.)
     ax1.fill_between(x, y1 - dy, y1 + dy, color=colors[0], alpha=0.2)
     y2 = df_dense.mean()
     dy = df_dense.std()
-    ax1.plot(x, y2, linestyle='-', marker='o', color=colors[1], linewidth =1.)
+    ax1.plot(x, y2, linestyle='-', marker='o', color=colors[1], linewidth=1.)
     ax1.fill_between(x, y2 - dy, y2 + dy, color=colors[1], alpha=0.1)
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
@@ -51,10 +53,11 @@ def plot_compaison(ax1, label, df_pnet, df_dense):
     ax1.set_ylabel(label, fontproperties)
     ax1.legend(['P-NET', 'Dense'], fontsize=fontsize, loc='upper left', framealpha=0)
 
-    ax1.set_xticklabels(ax1.get_xticklabels(),  fontsize=fontsize)
+    ax1.set_xticklabels(ax1.get_xticklabels(), fontsize=fontsize)
     ax1.set_yticklabels(ax1.get_yticks(), size=fontsize)
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    ax1.set_ylim(0.3,1.0)
+    ax1.set_ylim(0.3, 1.0)
+
 
 sizes = []
 for i in range(0, 20, 3):
@@ -78,9 +81,9 @@ def get_stats(df_pnet, df_dense):
     return pvalues
 
 
-cols = ['f1',  'aupr', 'precision', 'recall', 'accuracy']
+cols = ['f1', 'aupr', 'precision', 'recall', 'accuracy']
 
-labels = ['F1 score',  'Area Under Precision Recall Curve', 'Precision', 'Recall',
+labels = ['F1 score', 'Area Under Precision Recall Curve', 'Precision', 'Recall',
           'Accuracy']
 
 
@@ -205,22 +208,21 @@ def plot_pnet_vs_dense_ratio(ax2, c='auc'):
         vals = ax2.get_yticks()
         ax2.set_yticklabels(['{:,.0%}'.format(x) for x in vals])
 
-    ax2.set_ylabel('Performance increase',fontproperties)
+    ax2.set_ylabel('Performance increase', fontproperties)
     ax2.set_xlabel('Number of samples', fontproperties)
 
 
 base_dir = PROSTATE_LOG_PATH
 models_base_dir = join(base_dir, 'compare/onsplit_ML_test_Apr-11_11-34')
 
-saving_dir = join(PLOTS_PATH,'extended_data')
+saving_dir = join(PLOTS_PATH, 'extended_data')
 
 if not exists(saving_dir):
     makedirs(saving_dir)
 
 
 def plot_pnet_vs_dense_same_arch(ax):
-    def plot_roc(ax, y_test, y_pred_score, save_dir,color, label=''):
-
+    def plot_roc(ax, y_test, y_pred_score, save_dir, color, label=''):
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_score, pos_label=1)
         roc_auc = metrics.auc(fpr, tpr)
 
@@ -232,7 +234,6 @@ def plot_pnet_vs_dense_same_arch(ax):
 
         ax.set_xlabel('False Positive Rate', fontproperties)
         ax.set_ylabel('True Positive Rate', fontproperties)
-
 
     pnet_base_dir = join(PROSTATE_LOG_PATH, 'pnet/onsplit_average_reg_10_tanh_large_testing')
     df_pnet = pd.read_csv(join(pnet_base_dir, 'P-net_ALL_testing.csv'), sep=',', index_col=0, header=[0])
@@ -252,16 +253,15 @@ def plot_pnet_vs_dense_same_arch(ax):
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     # ax.set_xticklabels(ax1.get_xticklabels(),  fontsize=fontsize)
-    ax.set_xticklabels(ax.get_xticklabels(),  fontsize=fontsize)
+    ax.set_xticklabels(ax.get_xticklabels(), fontsize=fontsize)
     # ax.set_yticklabels(ax1.get_yticks(), size=fontsize)
     ax.set_yticklabels(ax.get_yticks(), size=fontsize)
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
 
 def plot_pnet_vs_dense(axis):
-
     pvalus_list = []
-    for i,(c, l) in enumerate(zip(cols, labels)):
+    for i, (c, l) in enumerate(zip(cols, labels)):
         print i
         pvalues = plot_pnet_vs_dense_with_ratio(axis[i], c, label=l, plot_ratio=False)
         pvalus_list.append(pvalues)
@@ -271,12 +271,11 @@ def plot_pnet_vs_dense(axis):
     df.round(3).to_csv(join(saving_dir, filename))
 
 
-fontsize = 6 # legends, axis
+fontsize = 6  # legends, axis
 fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
 
 
 def run():
-
     fig = plt.figure(constrained_layout=False, figsize=(7.2, 9.72))
 
     spec2 = gridspec.GridSpec(ncols=2, nrows=4, figure=fig)

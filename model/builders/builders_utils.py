@@ -238,7 +238,7 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
 
             feature_names['h{}'.format(i)] = names
             # feature_names.append(names)
-        i= len(maps)
-        feature_names['h{}'.format(i-1)] = maps[-1].index
+        i = len(maps)
+        feature_names['h{}'.format(i - 1)] = maps[-1].index
         # feature_names.append(maps[-1].index)
     return outcome, decision_outcomes, feature_names

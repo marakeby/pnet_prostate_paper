@@ -1,28 +1,24 @@
 import itertools
+from os.path import join
 
 import matplotlib
+import numpy as np
+import pandas as pd
+import seaborn as sns
 from lifelines import KaplanMeierFitter
-import  pandas as pd
 from lifelines.statistics import logrank_test
+from matplotlib import pyplot as plt, gridspec
 from matplotlib.ticker import NullFormatter, FormatStrFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix, average_precision_score
 
 from analysis.figure_2.figure2_utils import add_at_risk_counts_CUSTOM
-import seaborn as sns
-
 from analysis.figure_2.figure2_utils import get_dense_sameweights, get_pnet_preformance, get_stats, plot_compaison
 from config_path import DATA_PATH, LOG_PATH, PROSTATE_LOG_PATH, PROSTATE_DATA_PATH, PLOTS_PATH
-from matplotlib import pyplot as plt, gridspec
-
-from os.path import join
-import numpy as np
-
 
 
 def plot_prc_all(ax):
-
     def get_prc_data():
         all_models_dict = {}
 
@@ -33,7 +29,7 @@ def plot_prc_all(ax):
                   'Adaptive Boosting', 'Decision Tree']
         model_map = {'Linear Support Vector Machine ': 'Linear support vector machine ',
                      'RBF Support Vector Machine ': 'RBF support vector machine ',
-                     'L2 Logistic Regression':'L2 logistic regression',
+                     'L2 Logistic Regression': 'L2 logistic regression',
                      'Random Forest': 'Random forest',
                      'Adaptive Boosting': 'Adaptive boosting',
                      'Decision Tree': 'Decision tree'
@@ -62,13 +58,12 @@ def plot_prc_all(ax):
 
     all_models_dict = get_prc_data()
     n = len(all_models_dict.keys()) + 1
-    colors= sns.color_palette(None,n)
+    colors = sns.color_palette(None, n)
     import collections
 
-    #sort based on area under prc
-    sorted_dict={}
+    # sort based on area under prc
+    sorted_dict = {}
     for i, k in enumerate(all_models_dict.keys()):
-
         df = all_models_dict[k]
         y_test = df['y']
         y_pred_score = df['pred_scores']
@@ -83,7 +78,7 @@ def plot_prc_all(ax):
         df = all_models_dict[k]
         y_test = df['y']
         y_pred_score = df['pred_scores']
-        print i,k
+        print i, k
         plot_prc(ax, y_test, y_pred_score, None, label=k, color=colors[i])
 
     f_scores = np.linspace(0.2, 0.8, num=4)
@@ -91,14 +86,14 @@ def plot_prc_all(ax):
         x = np.linspace(0.01, 1)
         y = f_score * x / (2 * x - f_score)
         l, = ax.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.3, linewidth=0.5)
-        if i==0:
-            tex='F1={0:.1f}'
+        if i == 0:
+            tex = 'F1={0:.1f}'
             xy = (y[45] - 0.07, 1.02)
         else:
             tex = '{0:.1f}'
             xy = (y[45] - 0.03, 1.02)
-        ax.annotate(tex.format(f_score), fontsize=fontsize, xy=xy, alpha = 0.7)
-    legend = ax.legend(loc="lower left", fontsize=fontsize-0.5, framealpha=0.0, markerscale=0.1)
+        ax.annotate(tex.format(f_score), fontsize=fontsize, xy=xy, alpha=0.7)
+    legend = ax.legend(loc="lower left", fontsize=fontsize - 0.5, framealpha=0.0, markerscale=0.1)
 
     for legend_handle in legend.legendHandles:
         legend_handle._legmarker.set_markersize(0)
@@ -106,7 +101,7 @@ def plot_prc_all(ax):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.tick_params(direction='out', length=0, width=0,  grid_alpha=0.5)
+    ax.tick_params(direction='out', length=0, width=0, grid_alpha=0.5)
 
     for tick in ax.get_yaxis().get_major_ticks():
         tick.set_pad(1)
@@ -120,6 +115,7 @@ def plot_prc_all(ax):
     yticks[0].label1.set_visible(False)
 
     # ax.grid(color='gray', linestyle='--', linewidth=0.5, alpha=.1)
+
 
 def plot_confusion_matrix_all(ax):
     base_dir = join(PROSTATE_LOG_PATH, 'pnet')
@@ -145,22 +141,21 @@ def plot_confusion_matrix_all(ax):
     ax.tick_params(axis=u'both', which=u'both', length=0)
 
 
-
-def get_predictions(filename, correct_prediction = True):
+def get_predictions(filename, correct_prediction=True):
     print filename
-    df  = pd.read_csv(filename, index_col= 0)
+    df = pd.read_csv(filename, index_col=0)
     if correct_prediction:
-        df.pred = df.pred_scores>=0.5
-    ind = (df.pred == 0)  & (df.y==0)
-    df_correct  = df[ind].copy()
-    ind = (df.pred == 1)  & (df.y==0)
-    df_wrong  = df[ind].copy()
+        df.pred = df.pred_scores >= 0.5
+    ind = (df.pred == 0) & (df.y == 0)
+    df_correct = df[ind].copy()
+    ind = (df.pred == 1) & (df.y == 0)
+    df_wrong = df[ind].copy()
     return df, df_correct, df_wrong
 
 
 def get_clinical():
-    filename = join( DATA_PATH , 'prostate/supporting_data/prad_p1000_clinical_final.txt')
-    clinical_df  = pd.read_csv(filename, sep='\t')
+    filename = join(DATA_PATH, 'prostate/supporting_data/prad_p1000_clinical_final.txt')
+    clinical_df = pd.read_csv(filename, sep='\t')
     return clinical_df
 
 
@@ -177,7 +172,6 @@ def plot_surv(ax, filename, correct_prediction, ci_show):
     correct_full = correct_full.dropna(subset=['PFS.time', 'PFS'])
     print correct_full.shape
     print wrong_full.shape
-
 
     data = correct_full
     T1 = data['PFS.time'] / 30
@@ -200,9 +194,6 @@ def plot_surv(ax, filename, correct_prediction, ci_show):
         print newxticks
         ax.set_xticks(newxticks)
 
-
-
-
     # add_at_risk_counts_CUSTOM(kmf1, kmf2, ax=ax, fontsize=fontsize, labels=['LMS','HMS'])
     add_at_risk_counts_CUSTOM(kmf1, kmf2, ax=ax, fontsize=fontsize)
     results = logrank_test(T1, T2, event_observed_A=E1, event_observed_B=E2)
@@ -214,11 +205,11 @@ def plot_surv(ax, filename, correct_prediction, ci_show):
         text = "log-rank\np < 0.0001"
     else:
         text = "log-rank\np = %0.1g" % results.summary['p']
-    ax.text(60, 0.4,text , fontsize=fontsize)
+    ax.text(60, 0.4, text, fontsize=fontsize)
     ax.set_ylim((0, 1.05))
     ax.set_xlabel("Months", fontproperties, labelpad=1)
     ax.set_ylabel("Survival rate", fontproperties, labelpad=0)
-    ax.legend(prop={'size': fontsize},framealpha=0, loc='lower right' )
+    ax.legend(prop={'size': fontsize}, framealpha=0, loc='lower right')
     # ax.xaxis.set_label_position('top')
     # ax.xaxis.set_ticks_position('top')
 
@@ -268,10 +259,10 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         text = fmt.format(labels[i, j], cm[i, j])
         ax.text(j, i, text,
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black", fontsize=fontsize)
+                horizontalalignment="center",
+                color="white" if cm[i, j] > thresh else "black", fontsize=fontsize)
 
-    ax.set_ylabel('True label',  fontproperties )
+    ax.set_ylabel('True label', fontproperties)
     ax.set_xlabel('Predicted label', fontproperties)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -280,7 +271,7 @@ def plot_confusion_matrix(ax, cm, classes, labels=None,
 
     ax.set_xticks(tick_marks)
     ax.set_xticklabels(classes, fontproperties)
-    ax.set_yticks([t-0.25 for t in tick_marks])
+    ax.set_yticks([t - 0.25 for t in tick_marks])
     ax.set_yticklabels(classes, fontproperties, rotation=90)
 
 
@@ -309,31 +300,29 @@ def get_pimary_mets():
     mets = np.array(mets)
     return primary, mets
 
+
 # def plot_external_validation_matrix():
 
 
 def plot_surv_all(ax):
-
     correct_prediction = True
     filename = join(LOG_PATH, 'p1000/pnet/onsplit_average_reg_10_tanh_large_testing')
     full_filename = join(filename, 'P-net_ALL_testing.csv')
-    plot_surv(ax, full_filename, correct_prediction,ci_show =False)
+    plot_surv(ax, full_filename, correct_prediction, ci_show=False)
     # ax.margins(0.1)
     # plt.gcf().subplots_adjust(top=0.9)
     # ax.tick_params(direction='in', length=.5, width=0, grid_alpha=0.5)
     for tick in ax.get_xaxis().get_major_ticks():
         tick.set_pad(4)
-    ax.set_yticks([0, 0.2, 0.4,0.6,0.8,1.0])
-
+    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
     # ax.subplots_adjust(top=0.9)
 
 
 def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
-
     sns.set_color_codes('muted')
     current_palette = sns.color_palette()
-    color=current_palette[3]
+    color = current_palette[3]
 
     sizes = []
     for i in range(0, 20, 3):
@@ -345,16 +334,15 @@ def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
     df_pnet = get_pnet_preformance(col=c)
     pvalues = get_stats(df_pnet, df_dense_sameweights)
     print c, zip(pvalues, sizes)
-    plot_compaison(ax, label, df_pnet, df_dense_sameweights, sizes,linewidth)
+    plot_compaison(ax, label, df_pnet, df_dense_sameweights, sizes, linewidth)
     ax.set_ylabel(label, fontproperties, labelpad=1)
-    ax.legend(['P-NET', 'Dense'], fontsize=fontsize, loc= 'upper left', framealpha=0)
-
+    ax.legend(['P-NET', 'Dense'], fontsize=fontsize, loc='upper left', framealpha=0)
 
     y1 = df_pnet.mean()
     y2 = df_dense_sameweights.mean()
     height = map(max, zip(y1, y2))
     print 'height', height
-    updated_values=[]
+    updated_values = []
     for i, (p, s) in enumerate(zip(pvalues, sizes)):
         if p >= 0.05:
             displaystring = r'NS'
@@ -364,15 +352,15 @@ def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
             displaystring = r'**'
         else:
             displaystring = r'*'
-        updated_values.append('{:.0f}\n{}'.format(s,displaystring ))
+        updated_values.append('{:.0f}\n{}'.format(s, displaystring))
         # ax.axvline(x=s, ymin=0.0, ymax=0.85,linestyle='--', alpha=0.3, linewidth=linewidth)
     ax.set_xscale("log")
-    ax.set_xticks([],[])
+    ax.set_xticks([], [])
     ax.xaxis.set_major_formatter(NullFormatter())
     ax.xaxis.set_minor_formatter(NullFormatter())
     ax.set_xticks(sizes)
     ax.set_xticklabels(updated_values, fontsize=fontsize)
-    ax.set_xlim((min(sizes) -5, max(sizes)+50))
+    ax.set_xlim((min(sizes) - 5, max(sizes) + 50))
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label.set_fontsize(fontsize)
@@ -389,10 +377,10 @@ def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
         coefs = np.polyfit(sizes, ratio, 3)
         new_line = np.polyval(coefs, new_x)
 
-        ax2.plot(new_x, new_line, '-.',linewidth=linewidth, color=color)
-        ax2.set_ylim((0.005,.23))
-        ax.set_ylim((.5,1.05))
-        ax2.set_ylabel('Performance increase', fontproperties,  labelpad=3)
+        ax2.plot(new_x, new_line, '-.', linewidth=linewidth, color=color)
+        ax2.set_ylim((0.005, .23))
+        ax.set_ylim((.5, 1.05))
+        ax2.set_ylabel('Performance increase', fontproperties, labelpad=3)
         vals = ax2.get_yticks()
         # ax2.set_yticklabels(['{:,.0%}'.format(x) for x in vals], fontproperties)
         ax2.set_yticklabels(['{:,.0%}'.format(x) for x in vals], fontsize=fontsize)
@@ -406,7 +394,7 @@ def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
         # ax2.spines['left'].set_visible(False)
         # ax2.spines['bottom'].set_visible(False)
         # ax2.tick_params(length=, width=1)
-        ax2.tick_params(length= 2, direction="in", pad=-15)
+        ax2.tick_params(length=2, direction="in", pad=-15)
         for tick in ax2.get_yaxis().get_major_ticks():
             # tick.set_pad(-20)
             tick.set_pad(-15)
@@ -420,15 +408,13 @@ def plot_pnet_vs_dense_with_ratio(ax, c, label, plot_ratio=False):
     for tick in ax.get_xaxis().get_major_ticks():
         tick.set_pad(.7)
 
-    pvalues_dict={}
-    for p, s in zip(pvalues,sizes):
+    pvalues_dict = {}
+    for p, s in zip(pvalues, sizes):
         pvalues_dict[s] = p
 
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
     return pvalues_dict
-
-
 
 
 def plot_external_validation_matrix(ax):
@@ -447,7 +433,7 @@ def plot_external_validation_matrix(ax):
         print('Confusion matrix, without normalization')
 
     classes = ['{}\n{}'.format('Fraser et al.', '(localized)'), '{}\n{}'.format('Robinson et al.', '(metastatic)')]
-    cm=cm.T
+    cm = cm.T
 
     im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
     fig = plt.gcf()
@@ -527,21 +513,21 @@ def plot_external_validation_matrix(ax):
     # ax2.set_yticks([])
     # ax2.set_xticks([])
 
+
 linewidth = 0.7
-fontsize = 5 # legends, axis
+fontsize = 5  # legends, axis
 fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
 saving_dir = join(PLOTS_PATH, 'figure2')
 
+
 def run():
-    fig = plt.figure(constrained_layout=False, figsize=(3.5,3.))
-    spec2 = gridspec.GridSpec(ncols=3, nrows=3, figure=fig, width_ratios= [30,0.5,20], height_ratios=[10,0.5,10])
+    fig = plt.figure(constrained_layout=False, figsize=(3.5, 3.))
+    spec2 = gridspec.GridSpec(ncols=3, nrows=3, figure=fig, width_ratios=[30, 0.5, 20], height_ratios=[10, 0.5, 10])
 
     ax1 = fig.add_subplot(spec2[0, 0])
     ax2 = fig.add_subplot(spec2[0, 1:])
     ax3 = fig.add_subplot(spec2[2, 0])
     ax4 = fig.add_subplot(spec2[2, 2])
-
-
 
     plot_prc_all(ax1)
     # plot_confusion_matrix_all(ax2)
@@ -552,10 +538,9 @@ def run():
     # plot_external_validation_matrix(ax3)
     fig.subplots_adjust(left=0.07, bottom=0.09, right=0.93, top=0.95, wspace=0.3, hspace=0.3)
 
-
     saving_filename = join(saving_dir, 'figure2.png')
     plt.savefig(saving_filename, dpi=300)
-    matplotlib.rcParams['pdf.fonttype']=42
+    matplotlib.rcParams['pdf.fonttype'] = 42
 
     saving_filename = join(saving_dir, 'figure2.pdf')
     plt.savefig(saving_filename)
@@ -564,5 +549,6 @@ def run():
 
     # plt.savefig(saving_filename, dpi=300)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     run()

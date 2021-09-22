@@ -1,13 +1,11 @@
 import logging
-from copy import deepcopy
-from os.path import dirname, join
-from  config_path import *
+
 import numpy as np
 import pandas as pd
 
-# current_dir_path = dirname(__file__)
-# data_path= dirname(current_dir_path)
-data_path= DATA_PATH
+from config_path import *
+
+data_path = DATA_PATH
 processed_path = join(PROSTATE_DATA_PATH, 'processed')
 
 # use this one
@@ -18,7 +16,6 @@ gene_important_mutations_only = 'P1000_final_analysis_set_cross_important_only.c
 gene_important_mutations_only_plus_hotspots = 'P1000_final_analysis_set_cross_important_only_plus_hotspots.csv'
 gene_hotspots = 'P1000_final_analysis_set_cross_hotspots.csv'
 gene_truncating_mutations_only = 'P1000_final_analysis_set_cross_truncating_only.csv'
-# gene_expression = 'P1000_data_tpm.csv'
 gene_expression = 'P1000_adjusted_TPM.csv'
 fusions_filename = 'p1000_onco_ets_fusions.csv'
 cnv_burden_filename = 'P1000_data_CNA_burden.csv'
@@ -57,7 +54,6 @@ def load_data(filename, selected_genes=None):
     samples = all.index
 
     del all['response']
-    # np.savetxt(filename+'loaded_cols', all.columns, fmt='%s')
     x = all
     genes = all.columns
 
@@ -115,9 +111,7 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
 
     if data_type == 'mut_important_plus_hotspots':
         x, response, info, genes = load_data(gene_important_mutations_only_plus_hotspots, selected_genes)
-        # if mut_binary:
-        #     logging.info('mut_binary = True')
-        #     x[x > 1.] = 1.
+
     if data_type == 'mut_hotspots':
         x, response, info, genes = load_data(gene_hotspots, selected_genes)
 
@@ -126,7 +120,6 @@ def load_data_type(data_type='gene', cnv_levels=5, cnv_filter_single_event=True,
         if mut_binary:
             logging.info('mut_binary = True')
             x[x > 1.] = 1.
-            # x[x<1.]=-1.
 
     if data_type == 'gene_final_no_silent':
         x, response, info, genes = load_data(gene_final_no_silent, selected_genes)
@@ -223,7 +216,7 @@ def combine(x_list, y_list, rows_list, cols_list, data_type_list, combine_type, 
 
     if use_coding_genes_only:
         f = join(data_path, 'genes/HUGO_genes/protein-coding_gene_with_coordinate_minimal.txt')
-        coding_genes_df = pd.read_csv(f, sep='\t',header=None)
+        coding_genes_df = pd.read_csv(f, sep='\t', header=None)
         coding_genes_df.columns = ['chr', 'start', 'end', 'name']
         coding_genes = set(coding_genes_df['name'].unique())
         cols = cols.intersection(coding_genes)
@@ -276,7 +269,7 @@ def split_cnv(x_df):
 
 class ProstateDataPaper():
 
-    def __init__(self, data_type='mut', account_for_data_type=None,cnv_levels=5,
+    def __init__(self, data_type='mut', account_for_data_type=None, cnv_levels=5,
                  cnv_filter_single_event=True, mut_binary=False,
                  selected_genes=None, combine_type='intersection',
                  use_coding_genes_only=False, drop_AR=False,
@@ -286,12 +279,12 @@ class ProstateDataPaper():
         self.training_split = training_split
         if not selected_genes is None:
             if type(selected_genes) == list:
-                #list of genes
+                # list of genes
                 selected_genes = selected_genes
             else:
                 # file that will be used to load list of genes
-                selected_genes_file= join(data_path, 'genes')
-                selected_genes_file= join(selected_genes_file, selected_genes)
+                selected_genes_file = join(data_path, 'genes')
+                selected_genes_file = join(selected_genes_file, selected_genes)
                 df = pd.read_csv(selected_genes_file, header=0)
                 selected_genes = list(df['genes'])
 
@@ -360,14 +353,15 @@ class ProstateDataPaper():
             rows = rows[ind]
 
         if account_for_data_type is not None:
-            x_genomics = pd.DataFrame(x, columns = cols, index= rows)
-            y_genomics = pd.DataFrame(y,  index= rows, columns=['response'])
+            x_genomics = pd.DataFrame(x, columns=cols, index=rows)
+            y_genomics = pd.DataFrame(y, index=rows, columns=['response'])
             x_list = []
             y_list = []
             rows_list = []
             cols_list = []
             for t in account_for_data_type:
-                x_, y_, rows_, cols_ = load_data_type(t, cnv_levels, cnv_filter_single_event, mut_binary, selected_genes)
+                x_, y_, rows_, cols_ = load_data_type(t, cnv_levels, cnv_filter_single_event, mut_binary,
+                                                      selected_genes)
                 x_df = pd.DataFrame(x_, columns=cols_, index=rows_)
                 x_list.append(x_df), y_list.append(y_), rows_list.append(rows_), cols_list.append(cols_)
 
@@ -375,29 +369,28 @@ class ProstateDataPaper():
             x_all = pd.concat([x_genomics, x_account_for], keys=['genomics', 'account_for'], join='inner', axis=1)
 
             common_samples = set(rows).intersection(x_all.index)
-            x_all = x_all.loc[common_samples,:]
-            y = y_genomics.loc[common_samples,:]
+            x_all = x_all.loc[common_samples, :]
+            y = y_genomics.loc[common_samples, :]
 
             y = y['response'].values
-            x= x_all.values
-            cols= x_all.columns
-            rows= x_all.index
+            x = x_all.values
+            cols = x_all.columns
+            rows = x_all.index
 
         if selected_samples is not None:
             selected_samples_file = join(processed_path, selected_samples)
             df = pd.read_csv(selected_samples_file, header=0)
             selected_samples_list = list(df['Tumor_Sample_Barcode'])
 
-            x = pd.DataFrame(x, columns = cols, index= rows)
-            y = pd.DataFrame(y,  index= rows, columns=['response'])
+            x = pd.DataFrame(x, columns=cols, index=rows)
+            y = pd.DataFrame(y, index=rows, columns=['response'])
 
-            x=x.loc[selected_samples_list,:]
-            y=y.loc[selected_samples_list,:]
+            x = x.loc[selected_samples_list, :]
+            y = y.loc[selected_samples_list, :]
             rows = x.index
             cols = x.columns
-            y=y['response'].values
+            y = y['response'].values
             x = x.values
-
 
         self.x = x
         self.y = y
@@ -427,10 +420,6 @@ class ProstateDataPaper():
         ind_train = info.isin(info_train)
         ind_validate = info.isin(info_validate)
         ind_test = info.isin(info_test)
-
-        # ind_train = info.isin(training_set.id)
-        # ind_validate = info.isin(validation_set.id)
-        # ind_test = info.isin(testing_set.id)
 
         x_train = x[ind_train]
         x_test = x[ind_test]

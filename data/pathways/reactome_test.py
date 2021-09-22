@@ -24,6 +24,7 @@ print nx.info(reactome_net.get_completed_network(n_levels=5))
 layers = reactome_net.get_layers(n_levels=3)
 print len(layers)
 
+
 def get_map_from_layer(layer_dict):
     '''
     :param layer_dict: dictionary of connections (e.g {'pathway1': ['g1', 'g2', 'g3']}
