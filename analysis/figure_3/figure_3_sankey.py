@@ -1,4 +1,6 @@
 from os.path import dirname, realpath
+
+from config_path import PATHWAY_PATH
 from setup import saving_dir
 from analysis.vis_utils import get_reactome_pathway_names
 
@@ -543,8 +545,8 @@ def get_fromated_network(links, high_nodes_df, col_name, remove_others):
     # shorten names
 
     def get_short_names(all_node_labels):
-        '/Users/haithamelmarakeby/PycharmProjects/pnet2/analysis/figure_3/extracted/pathways_short_names.xlsx'
-        df = pd.read_excel(join(module_path, './extracted/pathways_short_names.xlsx'), index_col=0)
+
+        df = pd.read_excel(join(PATHWAY_PATH, 'pathways_short_names.xlsx'), index_col=0)
         mapping_dict = {}
         for k, v in zip(df['Full name'].values, df['Short name (Eli)'].values):
             mapping_dict[k] = str(v)

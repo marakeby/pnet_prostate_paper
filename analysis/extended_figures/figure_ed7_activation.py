@@ -70,9 +70,9 @@ current_dir = dirname(realpath(__file__))
 
 def plot_activation(ax, column='coef_combined', layer=3, pad=200):
 
-    node_activation = pd.read_csv(join(module_path,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
-    response = pd.read_csv(join(module_path,'extracted/response.csv'), index_col=0)
-    df = pd.read_csv(join(module_path,'extracted/activation_{}.csv'.format(layer)), index_col=0)
+    node_activation = pd.read_csv(join(module_path,'figure_3/extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    response = pd.read_csv(join(module_path,'figure_3/extracted/response.csv'), index_col=0)
+    df = pd.read_csv(join(module_path,'figure_3/extracted/activation_{}.csv'.format(layer)), index_col=0)
     df.columns = get_pathway_names(df.columns)
     if layer==1:
         column='coef_combined'

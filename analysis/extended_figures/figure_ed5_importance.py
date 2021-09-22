@@ -247,12 +247,12 @@ def plot_high_genes2(ax, layer=1, graph ='hist', direction='h'):
     else:
         column = 'coef'
 
-    node_importance = pd.read_csv(join(module_path,'./extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    node_importance = pd.read_csv(join(module_path,'./figure_3/extracted/node_importance_graph_adjusted.csv'), index_col=0)
     high_nodes = node_importance[node_importance.layer == layer].abs().nlargest(10, columns=[column])
     # high_nodes = node_importance[node_importance.layer == layer].abs().nlargest(10, columns=['coef'])
     features = list(high_nodes.index)
-    response = pd.read_csv(join(module_path,'./extracted/response.csv'), index_col=0)
-    df_in = pd.read_csv(join(module_path, './extracted/gradient_importance_detailed_{}.csv').format(layer), index_col=0)
+    response = pd.read_csv(join(module_path,'./figure_3/extracted/response.csv'), index_col=0)
+    df_in = pd.read_csv(join(module_path, './figure_3/extracted/gradient_importance_detailed_{}.csv').format(layer), index_col=0)
     df_in = df_in.copy()
     df_in = df_in.join(response)
     df_in['group'] = df_in.response
@@ -395,8 +395,8 @@ fontsize = 5 # legends, axis
 fontproperties = {'family': 'Arial', 'weight': 'normal', 'size': 6}
 
 def plot_axis(axis):
-    node_importance = pd.read_csv(join(module_path,'extracted/node_importance_graph_adjusted.csv'), index_col=0)
-    response = pd.read_csv(join(module_path, 'extracted/response.csv'), index_col=0)
+    node_importance = pd.read_csv(join(module_path,'figure_3/extracted/node_importance_graph_adjusted.csv'), index_col=0)
+    response = pd.read_csv(join(module_path, 'figure_3/extracted/response.csv'), index_col=0)
     print response.head()
     layers = sorted(list(node_importance.layer.unique()))
     print layers
